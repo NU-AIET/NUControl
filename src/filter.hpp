@@ -13,8 +13,6 @@ public:
   Butterworth2(float cutoff_hz, float sampling_hz)
   {
     // https://tttapa.github.io/Pages/Mathematics/Systems-and-Control-Theory/Digital-filters/Discretization/Discretization-of-a-fourth-order-Butterworth-filter.html
-    // const auto omega_c_d = 2.f * M_PI * cutoff_hz / sampling_hz;
-    // const auto omega_c_a =  2 * sampling_hz * tanf(0.5 * omega_c_d);
     const auto gamma = 1.f / tanf(M_PI * cutoff_hz / sampling_hz);
 
     const auto temp = gamma * gamma + _SQRT_2_ * gamma + 1;

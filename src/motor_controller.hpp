@@ -39,8 +39,9 @@ public:
     cs_(current_sensors),
     position_sensor_(pos_sensor)
   {
-    Kp_ = motor_.phase_L * _2_PI_ * 100.f; // Ohms = V / A
-    Ki_ = motor_.phase_R * _2_PI_ * 10.f; // Ohms * s = Vs / A
+    Kp_ = motor_.phase_L * _2_PI_ * 200.f; // Ohms = V / A
+    Ki_ = motor_.phase_R * _2_PI_ * 200.f; // Ohms * s = Vs / A
+    MAX_VOLT_ = 1.5f * motor_.phase_R * motor_.MAX_CURRENT;
   }
 
   void set_filters(float cutoff_freq_hz, float cuttoff_freq_hz_vel)
@@ -66,6 +67,7 @@ public:
     control_period_s_ = control_period_us_ * 1e-6;
     control_freq_hz_ = 1.f / control_period_s_;
     set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_vel_);
+    start_time_ = micros() * 1e-6f;
     driver_.enable();
 
     ctrl_timer_.begin(
@@ -186,6 +188,16 @@ public:
     return ret;
   }
 
+  float get_shaft_angle() const
+  {
+    return shaft_angle_.get_full_angle();
+  }
+
+  float get_shaft_velocity() const
+  {
+    return shaft_velocity_;
+  }
+
   void update_sensors()
   {
     // Position first
@@ -258,14 +270,14 @@ public:
 
 
           // Pump controllers 
-          // auto ff_volts = feedforward(desr_current);
+          auto ff_volts = feedforward(desr_current);
           auto fb_volts = feedback(desr_current);
           // auto bemf_volts = back_emf_decoupler();
 
-          driver_.set_phase_voltages(
-            filter_phase_voltages(
-              center_phase_voltages(
-                fb_volts)));
+          auto dr_volts = center_phase_voltages(filter_phase_voltages(ff_volts + fb_volts)) + PhaseValues<float>{1.f, 1.f, 1.f};
+
+          driver_.set_phase_voltages(dr_volts);
+          // applied_voltage_.at(i_) = dr_volts;
         }
         return;
 
@@ -318,6 +330,17 @@ private:
 
   bool debug_print_ = true;
 
+  const size_t max_size = 10000;
+
+  std::vector<float> time_ = std::vector<float>(max_size, 0.f);
+  std::vector<float> ref_current_ = std::vector<float>(max_size, 0.f);
+  std::vector<QuadDirectValues<float>> meas_current_ = std::vector<QuadDirectValues<float>>(max_size, {0.f, 0.f});
+  std::vector<PhaseValues<float>> applied_voltage_ = std::vector<PhaseValues<float>>(max_size, {0.f, 0.f, 0.f});
+
+  size_t i_ = 0;
+  float start_time_;
+
+
   void debug_print(auto msg)
   {
     if (!debug_print_) {return;}
@@ -329,11 +352,60 @@ private:
     Serial.println(msg);
   }
 
+  float afreq(float t)
+  {
+    return 1000.f * _2_PI_ * t;
+  }
+
   void control_step()
   {
+    // float now = micros() * 1e-6f - start_time_;
+    // float w = afreq(now);
+    // float req_curr = -0.5f * sinf(w * now) - 0.5f;
+    // target_ = motor_.kT * req_curr;
+    // time_.at(i_) = now;
+    // ref_current_.at(i_) = req_curr;
     update_sensors();
     update_control();
+    // meas_current_.at(i_) = quaddirect_currents_;
+
+    // ++i_;
+
+    // if(i_ >= max_size)
+    // {
+    //   stop_control();
+    //   data_out();
+
+    // }
   }
+
+  void data_out()
+  {
+    Serial.println("=====");
+    for (size_t j = 0; j < i_; ++j) {
+      Serial.print(time_.at(j), 6);
+      Serial.print("\t");
+      Serial.print(ref_current_.at(j), 6);
+      Serial.print("\t");
+      Serial.print(meas_current_.at(j).q, 6);
+      Serial.print("\t");
+      Serial.print(meas_current_.at(j).d, 6);
+      Serial.print("\t");
+      Serial.print(applied_voltage_.at(j).a, 6);
+      Serial.print("\t");
+      Serial.print(applied_voltage_.at(j).b, 6);
+      Serial.print("\t");
+      Serial.println(applied_voltage_.at(j).c, 6);
+      Serial.flush();
+    }
+    i_ = 0;
+    delay(1);
+    Serial.println("=====");
+    Serial.flush();
+    delay(10);
+    exit(1);
+
+  };
 
   PhaseValues<float> feedback(QuadDirectValues<float> desr_current)
   {
@@ -411,9 +483,9 @@ private:
 
     float _max = max(phase_volts.a, max(phase_volts.b, phase_volts.c));
     float ratio = 1.f;
-    // if (_max > MAX_VOLT_) {
-    //   ratio = MAX_VOLT_ / _max;
-    // }
+    if (_max > MAX_VOLT_) {
+      ratio = MAX_VOLT_ / _max;
+    }
     return new_volts * ratio;
   }
 

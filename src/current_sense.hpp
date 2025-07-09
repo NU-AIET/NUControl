@@ -7,12 +7,17 @@
 #include "filter.hpp"
 
 
+/// @brief Inline current sensor placed on a phase of a motor
 class InlineCurrentSensor
 {
 public:
   InlineCurrentSensor() = default;
   ~InlineCurrentSensor() = default;
 
+  /// @brief 
+  /// @param pin - Which pin to analogRead for the current data
+  /// @param amps_per_volt - how manys amps / volt from the ADC
+  /// @note Sets warning when current exceeds 1.5 * the gain, (Sensor approaches is near maximum read (1.5 / 1.65))
   InlineCurrentSensor(int pin, float amps_per_volt)
   : pin_(pin),
     gain_(amps_per_volt),
@@ -54,13 +59,11 @@ private:
   const int pin_;
   const float gain_;       //A / V_adc
   float offset_ = 1.65f;       // Volts
-  const float MAX_READING_;
+  const float MAX_READING_; // A
   Butterworth2 filter_;
-
 
   // Will fail if ADC resolution is changed!
   const float ADC_GAIN = 3.3f / 1024.f;
-
 
   bool validate_offset(size_t n = 10000) const
   {
@@ -151,15 +154,16 @@ public:
         max(
         abs(sensor_readings.at(i).a),
         max(abs(sensor_readings.at(i).b), abs(sensor_readings.at(i).c)));
-      const auto min_ =
-        min(
-        abs(sensor_readings.at(i).a),
-        min(abs(sensor_readings.at(i).b), abs(sensor_readings.at(i).c)));
+      // const auto min_ =
+      //   min(
+      //   abs(sensor_readings.at(i).a),
+      //   min(abs(sensor_readings.at(i).b), abs(sensor_readings.at(i).c)));
 
-      if (min_ < 0.05f) {
+      if (max_ < 0.05f) {
         Serial.print("No current detected on sensor number ");
         Serial.println(i);
-        Serial.println(min_);
+        Serial.print("Read Amps: ");
+        Serial.println(max_);
         // This sensor doesn't read anything!!
         return false;
       }
@@ -242,8 +246,8 @@ public:
       return phase_amps;
     }
 
-    // We now know that we only have 2 sensors or 0
-
+    // We now know that we only have 2 sensors
+    // We can then figure out the last phase 
     if (phase_idx_.a == -1) {
       phase_amps.a = -phase_amps.b - phase_amps.c;
     }

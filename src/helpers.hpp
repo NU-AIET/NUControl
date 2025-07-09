@@ -9,12 +9,23 @@ constexpr float _SQRT_3__2_ = 0.866025403784f;
 constexpr float _2_PI_ = 2.0f * M_PI;
 constexpr float _SQRT_2_ = 1.41421356237f;
 
+
+/// @brief Compare to precision values
+/// @tparam T type of values to check
+/// @param a - first value to check
+/// @param b - second value to check
+/// @param tol - tolerance to check within
+/// @returns true if the difference is less than tolerance, flase otherwise
 template<typename T>
 bool near_zero(T a, T b, float tol = 0.001)
 {
   return abs(a - b) < static_cast<T>(tol);
 }
 
+/// @brief Brings an angle into a standardized range where functions can operate efficently upon
+/// @tparam T type of angle unit
+/// @param radians - the angle in radians
+/// @returns the radians in the range (-PI, PI)
 template<typename T>
 T normalize_angle(T radians)
 {
@@ -27,6 +38,9 @@ T normalize_angle(T radians)
   return radians;
 }
 
+/// @brief Gets sine and cosine in a single function
+/// @param radians - the angle in radians
+/// @returns sin, cos of the given angle
 std::pair<float, float> sincos(float radians)
 {
   // Now zoned between -PI and PI

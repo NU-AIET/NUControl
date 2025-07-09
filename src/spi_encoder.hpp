@@ -25,8 +25,7 @@ struct Angle
   void update_angle(float new_radians)
   {
     auto delta_radians = new_radians - radians;
-    // Serial.println(1000.f*delta_radians);
-    if (abs(delta_radians) > (0.5 * _2_PI_)) {
+    if (abs(delta_radians) > (PI)) {
       rotations += (delta_radians > 0) ? -1 : 1;
     }
     radians = new_radians;
@@ -57,6 +56,9 @@ public:
     SPI_.beginTransaction(settings_);
   }
 
+
+  /// @brief read the encoder
+  /// @returns the angle is radians [0, 2PI) 
   float read()
   {
     digitalWriteFast(cs_, LOW);
