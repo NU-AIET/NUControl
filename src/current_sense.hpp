@@ -18,17 +18,23 @@ public:
   /// @param pin - Which pin to analogRead for the current data
   /// @param amps_per_volt - how manys amps / volt from the ADC
   /// @note Sets warning when current exceeds 1.5 * the gain, (Sensor approaches is near maximum read (1.5 / 1.65))
-  InlineCurrentSensor(int pin, float amps_per_volt)
+  InlineCurrentSensor(int pin, float amps_per_volt, int ADC_res=10)
   : pin_(pin),
     gain_(amps_per_volt),
-    MAX_READING_(1.5f * gain_)
-  {}
+    MAX_READING_(1.5f * gain_),
+    ADC_GAIN_(3.3f / (1 << ADC_res))
+  {
+    analogReadRes(ADC_res);
+  }
 
-  InlineCurrentSensor(int pin, float shunt_resistance_ohms, float op_amp_gain)
+  InlineCurrentSensor(int pin, float shunt_resistance_ohms, float op_amp_gain, int ADC_res=10)
   : pin_(pin),
     gain_(1.f / (shunt_resistance_ohms * op_amp_gain)),
-    MAX_READING_(1.5f * gain_)
-  {}
+    MAX_READING_(1.5f * gain_),
+    ADC_GAIN_(3.3f / (1 << ADC_res))
+  {
+    analogReadRes(ADC_res);
+  }
 
   bool init_sensor() const
   {
@@ -38,8 +44,8 @@ public:
 
   float read() const
   {
-    auto amps = gain_ * (analogRead(pin_) * ADC_GAIN - offset_);
-    if (abs(amps) > MAX_READING_) {
+    auto amps = gain_ * (analogRead(pin_) * ADC_GAIN_ - offset_);
+    if (fabs(amps) > MAX_READING_) {
       Serial.println("Current Sensor Saturated!");
     }
     return amps;
@@ -62,8 +68,8 @@ private:
   const float MAX_READING_; // A
   Butterworth2 filter_;
 
-  // Will fail if ADC resolution is changed!
-  const float ADC_GAIN = 3.3f / 1024.f;
+
+  const float ADC_GAIN_;
 
   bool validate_offset(size_t n = 10000) const
   {
@@ -71,12 +77,12 @@ private:
     for (size_t i = 0; i < n; ++i) {
       sum_ += analogRead(pin_);
     }
-    float offset = static_cast<float>(sum_) / n * ADC_GAIN;
+    float offset = static_cast<float>(sum_) / n * ADC_GAIN_;
 
     // Serial.println(offset);
 
     // Uh oh!
-    if (abs(offset_ - offset) > 1e-2) {
+    if (fabs(offset_ - offset) > 1e-2) {
       return false;
     }
     return true;
@@ -152,12 +158,12 @@ public:
     for (size_t i = 0; i < num_sensors_; ++i) {
       const auto max_ =
         max(
-        abs(sensor_readings.at(i).a),
-        max(abs(sensor_readings.at(i).b), abs(sensor_readings.at(i).c)));
+        fabs(sensor_readings.at(i).a),
+        max(fabs(sensor_readings.at(i).b), fabs(sensor_readings.at(i).c)));
       // const auto min_ =
       //   min(
-      //   abs(sensor_readings.at(i).a),
-      //   min(abs(sensor_readings.at(i).b), abs(sensor_readings.at(i).c)));
+      //   fabs(sensor_readings.at(i).a),
+      //   min(fabs(sensor_readings.at(i).b), fabs(sensor_readings.at(i).c)));
 
       if (max_ < 0.05f) {
         Serial.print("No current detected on sensor number ");
@@ -168,7 +174,7 @@ public:
         return false;
       }
 
-      if (max_ == abs(sensor_readings.at(i).a)) {
+      if (max_ == fabs(sensor_readings.at(i).a)) {
         phase_idx_.a = i;
         if (max_ > sensor_readings.at(i).a) {
           phase_dirs_.a = -1;
@@ -178,7 +184,7 @@ public:
         continue;
       }
 
-      if (max_ == abs(sensor_readings.at(i).b)) {
+      if (max_ == fabs(sensor_readings.at(i).b)) {
         phase_idx_.b = i;
         if (max_ > sensor_readings.at(i).b) {
           phase_dirs_.b = -1;
@@ -188,7 +194,7 @@ public:
         continue;
       }
 
-      if (max_ == abs(sensor_readings.at(i).c)) {
+      if (max_ == fabs(sensor_readings.at(i).c)) {
         phase_idx_.c = i;
         if (max_ > sensor_readings.at(i).c) {
           phase_dirs_.c = -1;

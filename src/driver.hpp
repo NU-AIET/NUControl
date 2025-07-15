@@ -71,13 +71,22 @@ public:
 
   /// @brief set the phase voltages of the motor
   /// @param voltages - The voltages to be applied to the end of each phase (A, B, C)
-  void set_phase_voltages(PhaseValues<float> voltages) const
+  /// \returns the PWM duty in bits applied to each phase
+  PhaseValues<int> set_phase_voltages(PhaseValues<float> voltages) const
   {
-    if (enabled_) {
-      analogWrite(pins_.a, volts_to_PWM(voltages.a));
-      analogWrite(pins_.b, volts_to_PWM(voltages.b));
-      analogWrite(pins_.c, volts_to_PWM(voltages.c));
+    if (!enabled_) {
+      return {0, 0, 0};
     }
+    const PhaseValues<int> duty = PhaseValues<int>{
+      volts_to_PWM(voltages.a),
+      volts_to_PWM(voltages.b),
+      volts_to_PWM(voltages.c)
+    };
+    analogWrite(pins_.a, duty.a);
+    analogWrite(pins_.b, duty.b);
+    analogWrite(pins_.c, duty.c);
+
+    return duty;
   }
 
 private:
@@ -100,9 +109,10 @@ private:
   /// @returns the duty cycle in PWM ticks
   int volts_to_PWM(float volt) const
   {
-    auto v =
-      std::clamp<float>(volt, 0, MAX_VOLT_) / driver_voltage_ * static_cast<float>(MAX_PWM_ - 1);
-    return static_cast<int>(v);
+    int v =
+      static_cast<int>(std::clamp<float>(volt, 0, MAX_VOLT_) / driver_voltage_ * static_cast<float>(MAX_PWM_ - 1));
+      // Serial.println(v);
+    return v;
   }
 
 };

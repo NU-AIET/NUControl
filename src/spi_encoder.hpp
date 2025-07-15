@@ -61,6 +61,11 @@ public:
   /// @returns the angle is radians [0, 2PI) 
   float read()
   {
+    return static_cast<float>(read_raw()) / 16383.0f * _2_PI_;
+  }
+
+  uint16_t read_raw()
+  {
     digitalWriteFast(cs_, LOW);
     SPI_.transfer16(read_cmd_);
     digitalWriteFast(cs_, HIGH);
@@ -68,7 +73,8 @@ public:
     digitalWriteFast(cs_, LOW);
     uint16_t raw = SPI_.transfer16(read_cmd_);
     digitalWriteFast(cs_, HIGH);
-    return (raw & 16383) / 16383.0f * _2_PI_;
+    return raw & 16383;
+    
   }
 
 private:
