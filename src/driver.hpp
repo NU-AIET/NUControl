@@ -11,7 +11,7 @@ public:
   Driver() = default;
   ~Driver() = default;
 
-  /// @brief 
+  /// @brief
   /// @param pins - The PWM pins corresponding to each phase (A, B, C)
   /// @param enable - The digital pin corresponing to the enable
   /// @param PWM_freq - The PWM frequency
@@ -54,14 +54,14 @@ public:
     return inited_;
   }
 
-  /// @brief enable the driver
+  /// \brief enable the driver
   void enable()
   {
     digitalWriteFast(enable_pin_, HIGH);
     enabled_ = true;
   }
 
-  /// @brief disable the driver, will set phase voltages to 0 as well.
+  /// \brief disable the driver, will set phase voltages to 0 as well.
   void disable()
   {
     set_phase_voltages({0.f, 0.f, 0.f});
@@ -69,8 +69,8 @@ public:
     enabled_ = false;
   }
 
-  /// @brief set the phase voltages of the motor
-  /// @param voltages - The voltages to be applied to the end of each phase (A, B, C)
+  /// \brief set the phase voltages of the motor
+  /// \param voltages - The voltages to be applied to the end of each phase (A, B, C)
   /// \returns the PWM duty in bits applied to each phase
   PhaseValues<int> set_phase_voltages(PhaseValues<float> voltages) const
   {
@@ -105,13 +105,14 @@ private:
   const float MAX_VOLT_;
 
   /// @brief converts between volts and PWM duty cycle
-  /// @param volts to be applied 
+  /// @param volts to be applied
   /// @returns the duty cycle in PWM ticks
   int volts_to_PWM(float volt) const
   {
     int v =
-      static_cast<int>(std::clamp<float>(volt, 0, MAX_VOLT_) / driver_voltage_ * static_cast<float>(MAX_PWM_ - 1));
-      // Serial.println(v);
+      static_cast<int>(std::round(std::clamp<float>(
+        volt, 0,
+        MAX_VOLT_) / driver_voltage_ * static_cast<float>(MAX_PWM_ - 1)));
     return v;
   }
 

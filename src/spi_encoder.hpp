@@ -58,7 +58,7 @@ public:
 
 
   /// @brief read the encoder
-  /// @returns the angle is radians [0, 2PI) 
+  /// @returns the angle is radians [0, 2PI)
   float read()
   {
     return static_cast<float>(read_raw()) / 16383.0f * _2_PI_;
@@ -73,8 +73,8 @@ public:
     digitalWriteFast(cs_, LOW);
     uint16_t raw = SPI_.transfer16(read_cmd_);
     digitalWriteFast(cs_, HIGH);
-    return raw & 16383;
-    
+    return (raw & 16383);
+
   }
 
 private:

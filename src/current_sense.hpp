@@ -14,11 +14,11 @@ public:
   InlineCurrentSensor() = default;
   ~InlineCurrentSensor() = default;
 
-  /// @brief 
+  /// @brief
   /// @param pin - Which pin to analogRead for the current data
   /// @param amps_per_volt - how manys amps / volt from the ADC
   /// @note Sets warning when current exceeds 1.5 * the gain, (Sensor approaches is near maximum read (1.5 / 1.65))
-  InlineCurrentSensor(int pin, float amps_per_volt, int ADC_res=10)
+  InlineCurrentSensor(int pin, float amps_per_volt, int ADC_res = 10)
   : pin_(pin),
     gain_(amps_per_volt),
     MAX_READING_(1.5f * gain_),
@@ -27,7 +27,7 @@ public:
     analogReadRes(ADC_res);
   }
 
-  InlineCurrentSensor(int pin, float shunt_resistance_ohms, float op_amp_gain, int ADC_res=10)
+  InlineCurrentSensor(int pin, float shunt_resistance_ohms, float op_amp_gain, int ADC_res = 10)
   : pin_(pin),
     gain_(1.f / (shunt_resistance_ohms * op_amp_gain)),
     MAX_READING_(1.5f * gain_),
@@ -253,7 +253,7 @@ public:
     }
 
     // We now know that we only have 2 sensors
-    // We can then figure out the last phase 
+    // We can then figure out the last phase
     if (phase_idx_.a == -1) {
       phase_amps.a = -phase_amps.b - phase_amps.c;
     }
