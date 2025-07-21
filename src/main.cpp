@@ -22,13 +22,13 @@ constexpr float PWM_FREQ = 20000.f;
 constexpr int PWM_RES = 12;
 constexpr float DRIVER_VOLTAGE = 24.f;
 
-Driver GateDriver{{2, 3, 4}, 1, PWM_FREQ, PWM_RES, DRIVER_VOLTAGE};
+BrushlessDriver GateDriver{{2, 3, 4}, 1, PWM_FREQ, PWM_RES, DRIVER_VOLTAGE};
 
 SPIEncoder Encoder{SPI, 10};
 
 MotorParameters EC45_Flat{8, 1.10f * 0.272, 1.0f * 111.f * 1e-6, 3.f, 8.f, 0.034, 0.0369};
 
-MotorController controller_{EC45_Flat, GateDriver, Current_Sensors, Encoder};
+BrushlessController controller_{EC45_Flat, GateDriver, Current_Sensors, Encoder};
 
 // constexpr float phase_resistance_ = 1.5f * 0.26; //Ohm
 // constexpr float phase_inductance_ = 1.5f * 111.f * 1e-6f; //Henry
@@ -63,9 +63,9 @@ void panic(TeensyTimerTool::errorCode err)  // print out error code, stop everyt
 
 void print()
 {
-  Serial.print("Position: ");
-  Serial.print(controller_.get_shaft_angle(), 6);
-  Serial.print("\t");
+  // Serial.print("Position: ");
+  // Serial.print(controller_.get_shaft_angle(), 6);
+  // Serial.print("\t");
   Serial.print("Velocity: ");
   Serial.println(controller_.get_shaft_velocity(), 6);
 }
@@ -116,12 +116,12 @@ void setup()
 
   // float force = 2.f;
   // constexpr float radius = 42.f / 1000.f * 0.5f;
-  // controller_.set_target(0.f);
+  controller_.set_target(0.f);
   // controller_.set_e_angle_offset(1.18);
 
   // controller_.start_print(10);
   controller_.start_control(100);
-  // timer_.begin(print, 100000);
+  timer_.begin(print, 100000);
 
 
   // controller_.start_control(100);

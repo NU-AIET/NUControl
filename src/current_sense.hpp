@@ -5,7 +5,7 @@
 #include "driver.hpp"
 #include "helpers.hpp"
 #include "filter.hpp"
-
+#include "errors.hpp"
 
 /// @brief Inline current sensor placed on a phase of a motor
 class InlineCurrentSensor
@@ -18,11 +18,13 @@ public:
   /// @param pin - Which pin to analogRead for the current data
   /// @param amps_per_volt - how manys amps / volt from the ADC
   /// @note Sets warning when current exceeds 1.5 * the gain, (Sensor approaches is near maximum read (1.5 / 1.65))
-  InlineCurrentSensor(int pin, float amps_per_volt, int ADC_res = 10)
+  InlineCurrentSensor(int pin, float amps_per_volt, int ADC_res = 10, void (*f) (ErrorCodes) = *handle_errors)
   : pin_(pin),
     gain_(amps_per_volt),
-    MAX_READING_(1.5f * gain_),
-    ADC_GAIN_(3.3f / (1 << ADC_res))
+    SATURATE_READING_(1.5f * gain_),
+    MAX_READING_(2.f * gain_),
+    ADC_GAIN_(3.3f / (1 << ADC_res)),
+    error_callback(f)
   {
     analogReadRes(ADC_res);
   }
@@ -45,8 +47,11 @@ public:
   float read() const
   {
     auto amps = gain_ * (analogRead(pin_) * ADC_GAIN_ - offset_);
-    if (fabs(amps) > MAX_READING_) {
+    if (fabs(amps) > SATURATE_READING_) {
       Serial.println("Current Sensor Saturated!");
+      if(fabs(amps) > MAX_READING_) {
+        error_callback(ErrorCodes::CURRENT_SENSE_OVER_LIMIT);
+      }
     }
     return amps;
   }
@@ -65,11 +70,14 @@ private:
   const int pin_;
   const float gain_;       //A / V_adc
   float offset_ = 1.65f;       // Volts
+  const float SATURATE_READING_; //A
   const float MAX_READING_; // A
+  const float ADC_GAIN_;
+
   Butterworth2 filter_;
 
+  void (*error_callback) (ErrorCodes);
 
-  const float ADC_GAIN_;
 
   bool validate_offset(size_t n = 10000) const
   {
@@ -117,7 +125,7 @@ public:
     return all_inited;
   }
 
-  bool align_sensors(Driver & driver, float align_volts = 0.5f)
+  bool align_sensors(BrushlessDriver & driver, float align_volts = 0.5f)
   {
 
     driver.enable();

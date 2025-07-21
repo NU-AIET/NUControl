@@ -7,6 +7,12 @@
 #include <wiring.h>
 #include "helpers.hpp"
 
+// enum AngleUnit{
+//   RADS,
+//   REVS,
+//   DEGREES,
+// };
+
 struct Angle
 {
   int rotations = 0;

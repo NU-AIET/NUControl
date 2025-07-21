@@ -3,10 +3,13 @@
 NU Control is intended to serve as a multi-functional, high performance, motor control library for the Center for Robotics and Biosystems at Northwestern University. The library is current written for a Teensy 4.x microcontroller.
 
 
-
 ## Capabilities
-- Brushless Direct Current Motors (BLDC)
-- Brushed Direct Current Motors ()
+- Brushless Direct Current Motors
+    - Example Motors:
+        - Maxon EC45 Flat
+        - Mosrac U2535
+- Brushed Direct Current Motors
+        - Pittman GM914
 
 
 ## Brushless Direct Current Motors
@@ -17,7 +20,7 @@ NU Control is intended to serve as a multi-functional, high performance, motor c
 ![](imgs/Control_Diagram.png)
 
 
-### Open Loop Velocity Controlit requires no 
+### Open Loop Velocity Control
 - By stepping through an electrical cycle at a desired rate, a brushless motor can be spun matching that rate.
 
 

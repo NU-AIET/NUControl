@@ -26,15 +26,17 @@ enum ControllerMode
   TORQUE,
 };
 
-class MotorController
+class BrushlessController
 {
 public:
-  MotorController() = default;
-  ~MotorController() = default;
+  BrushlessController() = default;
+  ~BrushlessController() = default;
 
-  MotorController(
-    MotorParameters motor, Driver & motor_driver,
-    InlineCurrentSensorPackage & current_sensors, SPIEncoder & pos_sensor)
+  BrushlessController(
+    MotorParameters motor,
+    BrushlessDriver & motor_driver,
+    InlineCurrentSensorPackage & current_sensors,
+    SPIEncoder & pos_sensor)
   : motor_(motor),
     driver_(motor_driver),
     cs_(current_sensors),
@@ -55,8 +57,8 @@ public:
 
     pos_filter_ = Butterworth2(300, control_freq_hz_);
     cs_.set_filters({filter_cutoff_freq_hz_current_, control_freq_hz_});
-    vel_filter_ = Butterworth2(10, control_freq_hz_);
-    bemf_filter_= Butterworth2(10, control_freq_hz_);
+    vel_filter_ = Butterworth2(1000, control_freq_hz_);
+    bemf_filter_= Butterworth2(1000, control_freq_hz_);
     applited_voltage_filters_.a = Butterworth2(cutoff_freq_hz, control_freq_hz_);
     applited_voltage_filters_.b = Butterworth2(cutoff_freq_hz, control_freq_hz_);
     applited_voltage_filters_.c = Butterworth2(cutoff_freq_hz, control_freq_hz_);
@@ -229,24 +231,17 @@ public:
 
     auto new_angle = pos_filter_.filter(shaft_angle_.get_full_angle());
 
-    float vel_hat = (new_angle - last_shaft_angle_) / (control_period_s_ );
+    if(loops_since_tick_ == 100) {
+
+      float vel_hat = (new_angle - last_vel_angle_) / (static_cast<float>(100) * control_period_s_ );
+      last_vel_angle_ = new_angle;
+      shaft_velocity_ = vel_filter_.filter(vel_hat);
+      loops_since_tick_ = 0;
+    }
 
     last_shaft_angle_ = new_angle;
 
-    // if(near_zero(new_angle, last_angle, 0.001f))
-    // {
-    //   loops_since_tick_++;
-    // } else {
-    //   if(loops_since_tick_ == 0) {
-    //     vel_hat = (new_angle - last_angle) / (control_period_s_ );
-    //   } else {
-    //     vel_hat = (new_angle - last_angle) /
-    //     (control_period_s_ * static_cast<float>(loops_since_tick_));
-    //   loops_since_tick_ = 0;
-    //   }
-    // }
-
-    shaft_velocity_ = vel_filter_.filter(vel_hat);
+    loops_since_tick_++;
 
     phase_currents_ = cs_.get_phase_currents(true);
     quaddirect_currents_ =
@@ -303,7 +298,7 @@ public:
           const auto dr_volts = center_phase_voltages(filter_phase_voltages(ff_volts)) +
             PhaseValues<float>{1.f, 1.f, 1.f};
 
-          desr_voltage_.at(i_) = dr_volts;
+          // desr_voltage_.at(i_) = dr_volts;
 
           driver_.set_phase_voltages(dr_volts);
           // fb_voltage_.at(i_) = driver_.set_phase_voltages(dr_volts);
@@ -318,7 +313,7 @@ public:
 
 private:
   MotorParameters motor_;
-  Driver & driver_;
+  BrushlessDriver & driver_;
   InlineCurrentSensorPackage & cs_;
   SPIEncoder & position_sensor_;
 
@@ -363,8 +358,10 @@ private:
   Angle shaft_angle_{0, 0.f};
   int loops_since_tick_ = 0;
   float shaft_velocity_ = 0.f; // rad /s
+  float last_vel_angle_ = 0.f;
 
   float last_shaft_angle_ = 0.f;
+  
 
   float open_loop_shaft_angle_ = 0.f;
   float open_loop_shaft_velocity_ = 0.f;
@@ -413,23 +410,23 @@ private:
 
   void control_step()
   {
-    float now = micros() * 1e-6f - start_time_;
-    // float w = afreq(now);
-    float req_curr = 0.0f;
-    target_ = motor_.kT * req_curr;
-    time_.at(i_) = now;
-    ref_current_.at(i_) = req_curr;
+    // float now = micros() * 1e-6f - start_time_;
+    // // float w = afreq(now);
+    // float req_curr = 0.0f;
+    // target_ = motor_.kT * req_curr;
+    // time_.at(i_) = now;
+    // ref_current_.at(i_) = req_curr;
     update_sensors();
     update_control();
-    meas_current_.at(i_) = quaddirect_currents_;
+    // meas_current_.at(i_) = quaddirect_currents_;
 
-    ++i_;
+    // ++i_;
 
-    if (i_ >= max_size) {
-      stop_control();
-      data_out();
+    // if (i_ >= max_size) {
+    //   stop_control();
+    //   data_out();
 
-    }
+    // }
   }
 
   void data_out()
