@@ -6,6 +6,7 @@
 #include <SPI.h>
 #include <wiring.h>
 #include "helpers.hpp"
+#include "discrete_filter.hpp"
 
 // enum AngleUnit{
 //   RADS,
@@ -17,6 +18,7 @@ struct Angle
 {
   int rotations = 0;
   float radians = 0.f;
+  DiscreteFilter<float> filter_;
 
   float get_full_angle() const
   {
@@ -35,6 +37,23 @@ struct Angle
       rotations += (delta_radians > 0) ? -1 : 1;
     }
     radians = new_radians;
+  }
+
+  /// @brief  DO NOT USE
+  /// @param new_radians 
+  void filtered_update_angle(float new_radians)
+  {
+    auto filt_rads = filter_.update(new_radians);
+    auto delta_radians = filt_rads - radians;
+    if (abs(delta_radians) > (PI)) {
+      rotations += (delta_radians > 0) ? -1 : 1;
+    }
+    radians = new_radians;
+  }
+
+  void set_filter(DiscreteFilter<float> filter)
+  {
+    filter_ = filter;
   }
 
 };
@@ -79,7 +98,7 @@ public:
     digitalWriteFast(cs_, LOW);
     uint16_t raw = SPI_.transfer16(read_cmd_);
     digitalWriteFast(cs_, HIGH);
-    return (raw & 16383);
+    return raw & 16383;
 
   }
 

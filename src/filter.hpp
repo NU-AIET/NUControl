@@ -42,6 +42,12 @@ public:
     return new_filt;
   }
 
+  void reset()
+  {
+    old_filtered_ = std::deque<float>{0.f, 0.f};
+    old_samples_ = std::deque<float>{0.f, 0.f, 0.f};
+  }
+
 private:
   std::deque<float> old_filtered_{0.f, 0.f};
   std::vector<float> a_s_{0.f, 0.f};

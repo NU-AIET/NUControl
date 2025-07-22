@@ -75,6 +75,7 @@ void setup()
   while (!Serial) {}
 
   TeensyTimerTool::attachErrFunc(panic);
+  analogReadAveraging(1);
 
   Serial.println("Hell yeah!");
 
@@ -121,7 +122,7 @@ void setup()
 
   // controller_.start_print(10);
   controller_.start_control(100);
-  timer_.begin(print, 100000);
+  // timer_.begin(print, 100000);
 
 
   // controller_.start_control(100);

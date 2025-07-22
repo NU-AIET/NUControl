@@ -44,24 +44,23 @@ public:
     ctrl_timer_(TeensyTimerTool::TMR4),
     print_timer_(TeensyTimerTool::TCK)
   {
-    Kp_ = motor_.phase_L * _2_PI_ * 200.f; // Ohms = V / A
-    Ki_ = motor_.phase_R * _2_PI_ * 200.f; // Ohms * s = Vs / A
+    Kp_ = motor_.phase_L * _2_PI_ * 100.f; // Ohms = V / A
+    Ki_ = motor_.phase_R * _2_PI_ * 100.f; // Ohms * s = Vs / A
     MAX_VOLT_ = 1.5f * motor_.phase_R * motor_.MAX_CURRENT;
     set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_vel_);
   }
 
-  void set_filters(float cutoff_freq_hz, float cuttoff_freq_hz_vel)
+  void set_filters(float cutoff_freq_hz, float filter_cutoff_freq_hz_current)
   {
     filter_cutoff_freq_hz_ = cutoff_freq_hz;
-    filter_cutoff_freq_hz_vel_ = cuttoff_freq_hz_vel;
+    filter_cutoff_freq_hz_current_ = filter_cutoff_freq_hz_current;
 
-    pos_filter_ = Butterworth2(300, control_freq_hz_);
-    cs_.set_filters({filter_cutoff_freq_hz_current_, control_freq_hz_});
-    vel_filter_ = Butterworth2(1000, control_freq_hz_);
-    bemf_filter_= Butterworth2(1000, control_freq_hz_);
-    applited_voltage_filters_.a = Butterworth2(cutoff_freq_hz, control_freq_hz_);
-    applited_voltage_filters_.b = Butterworth2(cutoff_freq_hz, control_freq_hz_);
-    applited_voltage_filters_.c = Butterworth2(cutoff_freq_hz, control_freq_hz_);
+    cs_.set_filters(Butterworth2nd{filter_cutoff_freq_hz_current_, control_freq_hz_});
+    // vel_filter_ = Butterworth2nd<float>(1000.f, control_freq_hz_);
+    // shaft_angle_.set_filter(Butterworth2nd<float>(500.f, control_freq_hz_));
+    applited_voltage_filters_.a = Butterworth2nd<float>(cutoff_freq_hz, control_freq_hz_);
+    applited_voltage_filters_.b = Butterworth2nd<float>(cutoff_freq_hz, control_freq_hz_);
+    applited_voltage_filters_.c = Butterworth2nd<float>(cutoff_freq_hz, control_freq_hz_);
   }
 
   void set_control_mode(ControllerMode ctrl_mode)
@@ -74,7 +73,12 @@ public:
     control_period_us_ = control_period_us;
     control_period_s_ = control_period_us_ * 1e-6;
     control_freq_hz_ = 1.f / control_period_s_;
+
     set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_vel_);
+
+    last_vel_angle_ = 0.f;
+    shaft_velocity_ = 0.f;
+    loops_since_tick_ = -1;
 
     last_error_ = QuadDirectValues<float>{0.f, 0.f};
     last_command_ = QuadDirectValues<float>{0.f, 0.f};
@@ -132,7 +136,7 @@ public:
 
     if (!skip_dir) {
 
-      float inital_shaft_angle = shaft_angle_.get_full_angle();
+      // float inital_shaft_angle = shaft_angle_.get_full_angle();
       set_control_mode(ControllerMode::OPEN_LOOP_VELOCITY);
       target_ = _2_PI_;
       start_control(control_period_us_);
@@ -214,7 +218,7 @@ public:
 
   float get_shaft_angle() const
   {
-    return last_shaft_angle_;
+    return shaft_angle_.get_full_angle();
   }
 
   float get_shaft_velocity() const
@@ -224,28 +228,44 @@ public:
 
   void update_sensors()
   {
+    // This is only tripped on the first loop since control has started.
+    // We need to do some cleanup to make sure our filters won't delay new inputs
+    if (loops_since_tick_ == -1)
+    {
+      auto pos = pos_sensor_dir_ * position_sensor_.read();
+      // shaft_angle_.filter_.reset(pos, pos);
+      shaft_angle_.update_angle(pos);
+      last_vel_angle_ = shaft_angle_.get_full_angle();
+      // vel_filter_.reset();
+      loops_since_tick_++;
+      loops_since_tick_++; // Bump back up to 1
+
+    } else{
+
     // Position first
-
-
     shaft_angle_.update_angle(pos_sensor_dir_ * position_sensor_.read());
+    auto new_angle = shaft_angle_.get_full_angle();
 
-    auto new_angle = pos_filter_.filter(shaft_angle_.get_full_angle());
-
-    if(loops_since_tick_ == 100) {
-
-      float vel_hat = (new_angle - last_vel_angle_) / (static_cast<float>(100) * control_period_s_ );
+    if (loops_since_tick_ == 100) {
+      float vel_hat = (new_angle - last_vel_angle_) /
+        (static_cast<float>(100) * control_period_s_ );
       last_vel_angle_ = new_angle;
-      shaft_velocity_ = vel_filter_.filter(vel_hat);
+      // shaft_velocity_ = vel_filter_.update(vel_hat);
+      shaft_velocity_ = vel_hat;
       loops_since_tick_ = 0;
     }
+    }
 
-    last_shaft_angle_ = new_angle;
+    shaft_angles_.at(i_) = shaft_angle_.get_full_angle();
+    vel_angles_.at(i_) = last_vel_angle_;
+
 
     loops_since_tick_++;
+    vels_.at(i_) = shaft_velocity_;
 
     phase_currents_ = cs_.get_phase_currents(true);
     quaddirect_currents_ =
-      phases_to_quaddirect<float>(phase_currents_, get_eangle(last_shaft_angle_));
+      phases_to_quaddirect<float>(phase_currents_, get_eangle(shaft_angle_.get_full_angle()));
   }
 
   void set_target(float target)
@@ -266,7 +286,7 @@ public:
           // Everything is an estimate in open loop
 
           float back_emf = motor_.kV * target_;
-          // May contradict other sensors
+
           auto phase_volts =
             quaddirect_to_phases<float>({0.5f + back_emf, 0.f}, get_eangle(open_loop_shaft_angle_));
           auto cntr_volts = center_phase_voltages(phase_volts);
@@ -289,19 +309,19 @@ public:
           QuadDirectValues<float> desr_current{requested_current, 0};
 
 
-          // Pump controllers f
+          // Pump controllers
           auto ff_volts = feedforward(desr_current);
-          // auto fb_volts = feedback(desr_current);
+          auto fb_volts = feedback(desr_current);
           // fb_voltage_.at(i_) = fb_volts;
-          // auto bemf_volts = back_emf_decoupler();
+          auto bemf_volts = back_emf_decoupler();
 
-          const auto dr_volts = center_phase_voltages(filter_phase_voltages(ff_volts)) +
+          const auto dr_volts =
+            center_phase_voltages(filter_phase_voltages(ff_volts+bemf_volts+fb_volts)) +
             PhaseValues<float>{1.f, 1.f, 1.f};
 
-          // desr_voltage_.at(i_) = dr_volts;
+          desr_voltage_.at(i_) = dr_volts;
 
           driver_.set_phase_voltages(dr_volts);
-          // fb_voltage_.at(i_) = driver_.set_phase_voltages(dr_volts);
         }
         return;
 
@@ -317,12 +337,40 @@ private:
   InlineCurrentSensorPackage & cs_;
   SPIEncoder & position_sensor_;
 
-  Butterworth2 vel_filter_;
 
-  PhaseValues<Butterworth2> applited_voltage_filters_;
-  PhaseValues<Butterworth2> feedback_voltage_filters_;
+  /// \note: Filters
+  // Unused
+  // Butterworth2nd<float> pos_filter_;
+  // Butterworth2nd<float> vel_filter_;
 
-  Butterworth2 bemf_filter_;
+  PhaseValues<Butterworth2nd<float>> applited_voltage_filters_;
+  PhaseValues<Butterworth2nd<float>> feedback_voltage_filters_;
+  Butterworth2nd<float> bemf_filter_;
+
+  /// \note: General cutoff frequency
+  float filter_cutoff_freq_hz_ = 2500.f;
+
+  /// \note: Current sensor specific cutoff
+  float filter_cutoff_freq_hz_current_ = 2500.f;
+
+  /// \note: Velocity estimator specific cutoff
+  float filter_cutoff_freq_hz_vel_ = 100.f;
+
+
+  /// \note: Position / State Variables
+  int pos_sensor_dir_ = 1;
+  Angle shaft_angle_{0, 0.f};
+  int loops_since_tick_ = -1;
+  float shaft_velocity_ = 0.f; // rad /s
+  float last_vel_angle_ = 0.f;
+
+  float e_ang_offset_ = 0.f; //rad = How much to subtract from mech ang to align w/ electical angle
+
+  float target_; // Units depend on control mode, either rad /s or Nm
+
+  /// \note: Open loop variables
+  float open_loop_shaft_angle_ = 0.f;
+  float open_loop_shaft_velocity_ = 0.f;
 
   PhaseValues<float> phase_currents_{0.f, 0.f, 0.f};
   QuadDirectValues<float> quaddirect_currents_{0.f, 0.f};
@@ -348,29 +396,7 @@ private:
   float control_period_s_ = 100.f * 1e-6f; // s
   float control_freq_hz_ = 10000.f;
 
-  float filter_cutoff_freq_hz_ = 2500.f;
-  float filter_cutoff_freq_hz_current_ = 2500.f;
-  float filter_cutoff_freq_hz_vel_ = 100.f;
-
-  Butterworth2 pos_filter_;
-
-  int pos_sensor_dir_ = 1;
-  Angle shaft_angle_{0, 0.f};
-  int loops_since_tick_ = 0;
-  float shaft_velocity_ = 0.f; // rad /s
-  float last_vel_angle_ = 0.f;
-
-  float last_shaft_angle_ = 0.f;
-  
-
-  float open_loop_shaft_angle_ = 0.f;
-  float open_loop_shaft_velocity_ = 0.f;
-
-  float e_ang_offset_ = 0.f; //rad = How much to subtract from mech ang to align w/ electical angle
-
   float MAX_VOLT_ = 3.f;
-
-  float target_; // Units depend on control mode, either rad /s or Nm
 
   bool debug_print_ = true;
 
@@ -383,14 +409,14 @@ private:
   std::vector<PhaseValues<float>> desr_voltage_ = std::vector<PhaseValues<float>>(
     max_size, {0.f,
       0.f, 0.f});
-  std::vector<PhaseValues<float>> fb_voltage_ =
-    std::vector<PhaseValues<float>>(max_size, {0.f, 0.f, 0.f});
+  std::vector<float> vels_ = std::vector<float>(max_size, 0.f);
+  std::vector<float> shaft_angles_ = std::vector<float>(max_size, 0.f);
+  std::vector<float> vel_angles_ = std::vector<float>(max_size, 0.f);
 
   size_t i_ = 0;
   float start_time_;
   int max_loops_ = 15;
   int loops_ = 0;
-
 
   void debug_print(auto msg)
   {
@@ -410,23 +436,23 @@ private:
 
   void control_step()
   {
-    // float now = micros() * 1e-6f - start_time_;
-    // // float w = afreq(now);
-    // float req_curr = 0.0f;
-    // target_ = motor_.kT * req_curr;
-    // time_.at(i_) = now;
-    // ref_current_.at(i_) = req_curr;
+    float now = micros() * 1e-6f - start_time_;
+    float w = afreq(now);
+    float req_curr = 1.0f;
+    target_ = motor_.kT * req_curr;
+    time_.at(i_) = now;
+    ref_current_.at(i_) = req_curr;
     update_sensors();
     update_control();
-    // meas_current_.at(i_) = quaddirect_currents_;
+    meas_current_.at(i_) = quaddirect_currents_;
 
-    // ++i_;
+    ++i_;
 
-    // if (i_ >= max_size) {
-    //   stop_control();
-    //   data_out();
+    if (i_ >= max_size) {
+      stop_control();
+      data_out();
 
-    // }
+    }
   }
 
   void data_out()
@@ -443,11 +469,11 @@ private:
       Serial.print("\t");
       Serial.print(meas_current_.at(j).d, 6);
       Serial.print("\t");
-      Serial.print(fb_voltage_.at(j).a, 6);
+      Serial.print(vels_.at(j), 6);
       Serial.print("\t");
-      Serial.print(fb_voltage_.at(j).b, 6);
+      Serial.print(shaft_angles_.at(j), 6);
       Serial.print("\t");
-      Serial.print(fb_voltage_.at(j).c, 6);
+      Serial.print(vel_angles_.at(j), 6);
       Serial.print("\t");
       Serial.print(desr_voltage_.at(j).a, 6);
       Serial.print("\t");
@@ -482,7 +508,7 @@ private:
     float gain_1 = Kp_ + 0.5 * Ki_ * control_period_s_;
     float gain_2 = -Kp_ + 0.5 * Ki_ * control_period_s_;
 
-    auto e_ang = get_eangle(last_shaft_angle_);
+    auto e_ang = get_eangle(shaft_angle_.get_full_angle());
 
     QuadDirectValues<float> error = desr_current - quaddirect_currents_;
 
@@ -497,7 +523,7 @@ private:
   PhaseValues<float> feedforward(QuadDirectValues<float> desr_current)
   {
     PhaseValues<float> desr_phase_currents =
-      quaddirect_to_phases<float>(desr_current, get_eangle(last_shaft_angle_));
+      quaddirect_to_phases<float>(desr_current, get_eangle(shaft_angle_.get_full_angle()));
 
     float A = 2.f * motor_.phase_L / control_period_s_ + motor_.phase_R;
     float B = 2.f * motor_.phase_L / control_period_s_ - motor_.phase_R;
@@ -510,15 +536,21 @@ private:
     return desr_phase_voltages;
   }
 
-  PhaseValues<float> back_emf_decoupler() const
+  PhaseValues<float> back_emf_decoupler()
   {
-    QuadDirectValues<float> back_emf{quaddirect_currents_.d, -quaddirect_currents_.q};
-    auto decoupler = quaddirect_to_phases<float>(
-      shaft_velocity_ * static_cast<float>(motor_.pole_pairs) * motor_.phase_L * back_emf, get_eangle(
-        last_shaft_angle_));
-        
-    auto bemf = quaddirect_to_phases<float>({0.5f * bemf_filter_.filter(motor_.kV * shaft_velocity_), 0.f} , get_eangle(last_shaft_angle_));
-    return bemf + decoupler;
+
+    /// \note: Maybe don't need? Should double check math.
+    // QuadDirectValues<float> back_emf{quaddirect_currents_.d, -quaddirect_currents_.q};
+    // auto decoupler = quaddirect_to_phases<float>(
+    //   shaft_velocity_ * static_cast<float>(motor_.pole_pairs) * motor_.phase_L * back_emf, get_eangle(
+    //     shaft_angle_.get_full_angle()));
+
+    auto bemf_volt = std::clamp(
+      0.5f * motor_.kV * shaft_velocity_, -motor_.kV * 300.f,
+      motor_.kV * 300.f);
+
+    auto bemf = quaddirect_to_phases<float>({bemf_volt, 0.f}, get_eangle(shaft_angle_.get_full_angle()));
+    return bemf;
 
   }
 
@@ -557,15 +589,84 @@ private:
 
   PhaseValues<float> filter_phase_voltages(PhaseValues<float> phase_volts)
   {
-    return {applited_voltage_filters_.a.filter(phase_volts.a), applited_voltage_filters_.b.filter(
-        phase_volts.b), applited_voltage_filters_.c.filter(phase_volts.c)};
+    return {applited_voltage_filters_.a.update(phase_volts.a), applited_voltage_filters_.b.update(
+        phase_volts.b), applited_voltage_filters_.c.update(phase_volts.c)};
   }
   PhaseValues<float> filter_feedback_voltages(PhaseValues<float> phase_volts)
   {
-    return {applited_voltage_filters_.a.filter(phase_volts.a), applited_voltage_filters_.b.filter(
-        phase_volts.b), applited_voltage_filters_.c.filter(phase_volts.c)};
+    return {applited_voltage_filters_.a.update(phase_volts.a), applited_voltage_filters_.b.update(
+        phase_volts.b), applited_voltage_filters_.c.update(phase_volts.c)};
   }
 
+
+};
+
+
+class BrushedController
+{
+public:
+  BrushedController() = default;
+  ~BrushedController() = default;
+
+  BrushedController(MotorParameters motor, BrushedDriver & motor_driver)
+  : motor_(motor),
+    driver_(motor_driver),
+    ctrl_timer_(TeensyTimerTool::TMR4),
+    print_timer_(TeensyTimerTool::TCK)
+  {}
+
+
+  void set_control_mode(ControllerMode mode)
+  {
+    control_mode_ = mode;
+  }
+
+  void set_target(float target)
+  {
+    target_ = target;
+  }
+
+  void update_control()
+  {
+    switch (control_mode_) {
+      case ControllerMode::OPEN_LOOP_VELOCITY:
+        {
+          auto v_d = motor_.kV * target_;
+          driver_.set_voltage(center_voltage({v_d, 0}));
+          /* code */
+          return;
+        }
+
+      default:
+        return;
+    }
+
+  }
+
+private:
+  MotorParameters motor_;
+  BrushedDriver & driver_;
+
+  TeensyTimerTool::PeriodicTimer ctrl_timer_;
+  TeensyTimerTool::PeriodicTimer print_timer_;
+
+  ControllerMode control_mode_ = ControllerMode::DISABLE;
+
+  float target_ = 0.f;
+  float MAX_VOLTAGE_ = 24.f;
+
+  std::pair<float, float> center_voltage(std::pair<float, float> volts)
+  {
+    auto min_ = min(volts.first, volts.second);
+
+    float ratio = 1.f;
+    auto max_ = max(volts.first, volts.second);
+    if (max_ > MAX_VOLTAGE_) {
+      ratio = MAX_VOLTAGE_ / max_;
+    }
+    return {ratio * (volts.first - min_) + 1, ratio * (volts.second - min_) + 1};
+
+  }
 
 
 };

@@ -24,5 +24,5 @@ NU Control is intended to serve as a multi-functional, high performance, motor c
 - By stepping through an electrical cycle at a desired rate, a brushless motor can be spun matching that rate.
 
 
-## Brushed Direct Current Motors
+## Brushed Direct Current Motors (Coming Soon)
 - Brushed motors do not require software commutation due to the presence of physical brushes. This greatly simplifies control at the cost of increased torque ripple.

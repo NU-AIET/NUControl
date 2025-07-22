@@ -6,6 +6,7 @@
 #include "helpers.hpp"
 #include "filter.hpp"
 #include "errors.hpp"
+#include "discrete_filter.hpp"
 
 /// @brief Inline current sensor placed on a phase of a motor
 class InlineCurrentSensor
@@ -18,7 +19,9 @@ public:
   /// @param pin - Which pin to analogRead for the current data
   /// @param amps_per_volt - how manys amps / volt from the ADC
   /// @note Sets warning when current exceeds 1.5 * the gain, (Sensor approaches is near maximum read (1.5 / 1.65))
-  InlineCurrentSensor(int pin, float amps_per_volt, int ADC_res = 10, void (*f) (ErrorCodes) = *handle_errors)
+  InlineCurrentSensor(
+    int pin, float amps_per_volt, int ADC_res = 10, void(*f) (
+      ErrorCodes) = * handle_errors)
   : pin_(pin),
     gain_(amps_per_volt),
     SATURATE_READING_(1.5f * gain_),
@@ -32,7 +35,8 @@ public:
   InlineCurrentSensor(int pin, float shunt_resistance_ohms, float op_amp_gain, int ADC_res = 10)
   : pin_(pin),
     gain_(1.f / (shunt_resistance_ohms * op_amp_gain)),
-    MAX_READING_(1.5f * gain_),
+    SATURATE_READING_(1.5f * gain_),
+    MAX_READING_(2.f * gain_),
     ADC_GAIN_(3.3f / (1 << ADC_res))
   {
     analogReadRes(ADC_res);
@@ -49,21 +53,21 @@ public:
     auto amps = gain_ * (analogRead(pin_) * ADC_GAIN_ - offset_);
     if (fabs(amps) > SATURATE_READING_) {
       Serial.println("Current Sensor Saturated!");
-      if(fabs(amps) > MAX_READING_) {
+      if (fabs(amps) > MAX_READING_) {
         error_callback(ErrorCodes::CURRENT_SENSE_OVER_LIMIT);
       }
     }
     return amps;
   }
 
-  void set_filter(Butterworth2 filter)
+  void set_filter(DiscreteFilter<float> filter)
   {
     filter_ = filter;
   }
 
   float read_filtered()
   {
-    return filter_.filter(read());
+    return filter_.update(read());
   }
 
 private:
@@ -74,9 +78,9 @@ private:
   const float MAX_READING_; // A
   const float ADC_GAIN_;
 
-  Butterworth2 filter_;
+  DiscreteFilter<float> filter_;
 
-  void (*error_callback) (ErrorCodes);
+  void (* error_callback) (ErrorCodes);
 
 
   bool validate_offset(size_t n = 10000) const
@@ -275,7 +279,7 @@ public:
     return phase_amps;
   }
 
-  void set_filters(Butterworth2 filter)
+  void set_filters(DiscreteFilter<float> filter)
   {
     for (size_t i = 0; i < num_sensors_; ++i) {
       sensors_.at(i)->set_filter(filter);
