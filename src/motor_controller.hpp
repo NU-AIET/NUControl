@@ -1,7 +1,6 @@
 #ifndef MOTOR_CONTROLLER_HPP
 #define MOTOR_CONTROLLER_HPP
 #include <TeensyTimerTool.h>
-
 #include "driver.hpp"
 #include "current_sense.hpp"
 #include "transformations.hpp"
@@ -44,23 +43,28 @@ public:
     ctrl_timer_(TeensyTimerTool::TMR4),
     print_timer_(TeensyTimerTool::TCK)
   {
-    Kp_ = motor_.phase_L * _2_PI_ * 100.f; // Ohms = V / A
-    Ki_ = motor_.phase_R * _2_PI_ * 100.f; // Ohms * s = Vs / A
+    Kp_ = motor_.phase_L * _2_PI_ * 25.f; // Ohms = V / A
+    Ki_ = motor_.phase_R * _2_PI_ * 25.f; // Ohms * s = Vs / A
+    set_feedback_filter(PIController<QuadDirectValues<float>>(Kp_, Ki_, control_period_s_));
     MAX_VOLT_ = 1.5f * motor_.phase_R * motor_.MAX_CURRENT;
-    set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_vel_);
+    set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_vel_, filter_cutoff_freq_hz_fb_);
   }
 
-  void set_filters(float cutoff_freq_hz, float filter_cutoff_freq_hz_current)
+  void set_filters(float cutoff_freq_hz, float filter_cutoff_freq_hz_current, float filter_cutoff_freq_hz_fb)
   {
     filter_cutoff_freq_hz_ = cutoff_freq_hz;
     filter_cutoff_freq_hz_current_ = filter_cutoff_freq_hz_current;
+    filter_cutoff_freq_hz_fb_ = filter_cutoff_freq_hz_fb;
 
-    cs_.set_filters(Butterworth2nd{filter_cutoff_freq_hz_current_, control_freq_hz_});
-    // vel_filter_ = Butterworth2nd<float>(1000.f, control_freq_hz_);
-    // shaft_angle_.set_filter(Butterworth2nd<float>(500.f, control_freq_hz_));
+    cs_.set_filters(Butterworth2nd<float>(filter_cutoff_freq_hz_current_, control_freq_hz_));
+
     applited_voltage_filters_.a = Butterworth2nd<float>(cutoff_freq_hz, control_freq_hz_);
     applited_voltage_filters_.b = Butterworth2nd<float>(cutoff_freq_hz, control_freq_hz_);
     applited_voltage_filters_.c = Butterworth2nd<float>(cutoff_freq_hz, control_freq_hz_);
+  
+    feedback_voltage_filters_.a = Butterworth2nd<float>(filter_cutoff_freq_hz_fb_, control_freq_hz_);
+    feedback_voltage_filters_.b = Butterworth2nd<float>(filter_cutoff_freq_hz_fb_, control_freq_hz_);
+    feedback_voltage_filters_.c = Butterworth2nd<float>(filter_cutoff_freq_hz_fb_, control_freq_hz_);
   }
 
   void set_control_mode(ControllerMode ctrl_mode)
@@ -74,7 +78,7 @@ public:
     control_period_s_ = control_period_us_ * 1e-6;
     control_freq_hz_ = 1.f / control_period_s_;
 
-    set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_vel_);
+    set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_vel_, filter_cutoff_freq_hz_fb_);
 
     last_vel_angle_ = 0.f;
     shaft_velocity_ = 0.f;
@@ -109,6 +113,11 @@ public:
       }, print_period_ms * 1000);
   }
 
+  void set_feedback_filter(DiscreteFilter<QuadDirectValues<float>, float> fb_filter)
+  {
+    feedback_ = fb_filter;
+  }
+
   void stop_print()
   {
     print_timer_.stop();
@@ -118,7 +127,7 @@ public:
   {
     auto ret_d = driver_.init();
     auto ret_cs = cs_.init_sensors();
-    set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_vel_);
+    set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_vel_, filter_cutoff_freq_hz_fb_);
 
     return ret_d & ret_cs;
 
@@ -228,6 +237,12 @@ public:
 
   void update_sensors()
   {
+    // auto start = micros();
+    // while(start - micros() < 25)
+    // {
+    //   yield();
+    // }
+
     // This is only tripped on the first loop since control has started.
     // We need to do some cleanup to make sure our filters won't delay new inputs
     if (loops_since_tick_ == -1)
@@ -345,7 +360,6 @@ private:
 
   PhaseValues<Butterworth2nd<float>> applited_voltage_filters_;
   PhaseValues<Butterworth2nd<float>> feedback_voltage_filters_;
-  Butterworth2nd<float> bemf_filter_;
 
   /// \note: General cutoff frequency
   float filter_cutoff_freq_hz_ = 2500.f;
@@ -355,6 +369,8 @@ private:
 
   /// \note: Velocity estimator specific cutoff
   float filter_cutoff_freq_hz_vel_ = 100.f;
+
+  float filter_cutoff_freq_hz_fb_ = 500.f;
 
 
   /// \note: Position / State Variables
@@ -372,6 +388,8 @@ private:
   float open_loop_shaft_angle_ = 0.f;
   float open_loop_shaft_velocity_ = 0.f;
 
+
+
   PhaseValues<float> phase_currents_{0.f, 0.f, 0.f};
   QuadDirectValues<float> quaddirect_currents_{0.f, 0.f};
 
@@ -381,6 +399,8 @@ private:
 
   QuadDirectValues<float> last_error_{0.f, 0.f};
   QuadDirectValues<float> last_command_{0.f, 0.f};
+
+  DiscreteFilter<QuadDirectValues<float>, float> feedback_;
 
   /// \note: Feedforward controller variables
   PhaseValues<float> last_desr_phase_currents_{0.f, 0.f, 0.f};
@@ -437,7 +457,7 @@ private:
   void control_step()
   {
     float now = micros() * 1e-6f - start_time_;
-    float w = afreq(now);
+    // float w = afreq(now);
     float req_curr = 1.0f;
     target_ = motor_.kT * req_curr;
     time_.at(i_) = now;
@@ -504,20 +524,13 @@ private:
   PhaseValues<float> feedback(QuadDirectValues<float> desr_current)
   {
 
-    /// \note, should maybe change to lag controller?
-    float gain_1 = Kp_ + 0.5 * Ki_ * control_period_s_;
-    float gain_2 = -Kp_ + 0.5 * Ki_ * control_period_s_;
-
     auto e_ang = get_eangle(shaft_angle_.get_full_angle());
 
     QuadDirectValues<float> error = desr_current - quaddirect_currents_;
 
-    QuadDirectValues<float> new_command = last_command_ + gain_1 * error + gain_2 * last_error_;
+    auto fb_phs_v = quaddirect_to_phases<float>(feedback_.update(error), e_ang);
 
-    last_command_ = new_command;
-    last_error_ = error;
-
-    return quaddirect_to_phases<float>(new_command, e_ang);
+    return filter_feedback_voltages(fb_phs_v);
   }
 
   PhaseValues<float> feedforward(QuadDirectValues<float> desr_current)
@@ -538,20 +551,12 @@ private:
 
   PhaseValues<float> back_emf_decoupler()
   {
-
-    /// \note: Maybe don't need? Should double check math.
-    // QuadDirectValues<float> back_emf{quaddirect_currents_.d, -quaddirect_currents_.q};
-    // auto decoupler = quaddirect_to_phases<float>(
-    //   shaft_velocity_ * static_cast<float>(motor_.pole_pairs) * motor_.phase_L * back_emf, get_eangle(
-    //     shaft_angle_.get_full_angle()));
-
     auto bemf_volt = std::clamp(
       0.5f * motor_.kV * shaft_velocity_, -motor_.kV * 300.f,
       motor_.kV * 300.f);
 
     auto bemf = quaddirect_to_phases<float>({bemf_volt, 0.f}, get_eangle(shaft_angle_.get_full_angle()));
     return bemf;
-
   }
 
   void printer()
@@ -594,8 +599,9 @@ private:
   }
   PhaseValues<float> filter_feedback_voltages(PhaseValues<float> phase_volts)
   {
-    return {applited_voltage_filters_.a.update(phase_volts.a), applited_voltage_filters_.b.update(
-        phase_volts.b), applited_voltage_filters_.c.update(phase_volts.c)};
+    return {feedback_voltage_filters_.a.update(phase_volts.a),
+            feedback_voltage_filters_.b.update(phase_volts.b),
+            feedback_voltage_filters_.c.update(phase_volts.c)};
   }
 
 

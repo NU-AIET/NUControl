@@ -4,14 +4,14 @@
 #include <deque>
 #include "helpers.hpp"
 
-template<typename T>
+template<typename T, typename G>
 class DiscreteFilter
 {
 public:
   DiscreteFilter() = default;
   ~DiscreteFilter() = default;
 
-  DiscreteFilter(std::vector<T> input_coeffs, std::vector<T> output_coeffs)
+  DiscreteFilter(std::vector<G> input_coeffs, std::vector<G> output_coeffs)
   : input_coeffs_(input_coeffs),
     output_coeffs_(output_coeffs),
     inputs_num_(input_coeffs.size()),
@@ -21,7 +21,7 @@ public:
     outputs_ = std::deque<T>(outputs_num_, static_cast<T>(0.f));
   }
 
-  T update(T new_input)
+  virtual T update(T new_input)
   {
     // Add new sample, remove oldest sample
     inputs_.push_front(new_input);
@@ -50,8 +50,8 @@ public:
   }
 
 private:
-  std::vector<T> input_coeffs_;
-  std::vector<T> output_coeffs_;
+  std::vector<G> input_coeffs_;
+  std::vector<G> output_coeffs_;
 
   size_t inputs_num_;
   size_t outputs_num_;
@@ -61,20 +61,20 @@ private:
 
 
 template<typename T>
-class Butterworth2nd : public DiscreteFilter<T>
+class Butterworth2nd : public DiscreteFilter<T, float>
 {
 public:
   Butterworth2nd() = default;
   ~Butterworth2nd() = default;
 
-  Butterworth2nd(T cutoff_hz, T sampling_hz)
-  : DiscreteFilter<T>(input_coeffs(cutoff_hz, sampling_hz), output_coeffs(cutoff_hz, sampling_hz))
+  Butterworth2nd(float cutoff_hz, float sampling_hz)
+  : DiscreteFilter<T, float>(input_coeffs(cutoff_hz, sampling_hz), output_coeffs(cutoff_hz, sampling_hz))
   {}
 
   // T update(T new_input) {DiscreteFilter<T>::update(new_input);}
 
 private:
-  std::vector<T> output_coeffs(T f_c, T f_s)
+  std::vector<float> output_coeffs(float f_c, float f_s)
   {
     T alpha = 1.f / tanf(M_PI * f_c / f_s);
     T beta = alpha * alpha + _SQRT_2_ * alpha + 1;
@@ -83,7 +83,7 @@ private:
 
   }
 
-  std::vector<T> input_coeffs(T f_c, T f_s)
+  std::vector<float> input_coeffs(float f_c, float f_s)
   {
     T alpha = 1.f / tanf(M_PI * f_c / f_s);
     T beta = alpha * alpha + _SQRT_2_ * alpha + 1;
@@ -95,18 +95,26 @@ private:
 };
 
 template<typename T>
-class PIController : public DiscreteFilter<T>
+class PIController : public DiscreteFilter<T, float>
 {
 public:
   PIController() = default;
   ~PIController() = default;
 
-  PIController(T Kp, T Ki, T control_period_s)
-  : DiscreteFilter<T>({Kp + 0.5f * Ki * control_period_s, -Kp + 0.5f * Ki * control_period_s},
+  PIController(float Kp, float Ki, float control_period_s)
+  : DiscreteFilter<T, float>({Kp + 0.5f * Ki * control_period_s, -Kp + 0.5f * Ki * control_period_s},
       {-1.f})
   {}
+};
 
-  T update(T new_input) {DiscreteFilter<T>::update(new_input);}
+class MotorFeedforward : public DiscreteFilter<PhaseValues<float>, float>
+{
+  MotorFeedforward() = default;
+  ~MotorFeedforward() = default;
+
+  MotorFeedforward(float phase_R, float phase_L, float control_period_s)
+  : DiscreteFilter<PhaseValues<float>, float>({2.f * phase_L / control_period_s + phase_R, -2.f * phase_L / control_period_s + phase_R}, {1.f})
+  {}
 
 };
 

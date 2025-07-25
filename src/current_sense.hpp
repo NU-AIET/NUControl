@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include "driver.hpp"
 #include "helpers.hpp"
-#include "filter.hpp"
 #include "errors.hpp"
 #include "discrete_filter.hpp"
 
@@ -60,7 +59,7 @@ public:
     return amps;
   }
 
-  void set_filter(DiscreteFilter<float> filter)
+  void set_filter(DiscreteFilter<float, float> filter)
   {
     filter_ = filter;
   }
@@ -78,7 +77,7 @@ private:
   const float MAX_READING_; // A
   const float ADC_GAIN_;
 
-  DiscreteFilter<float> filter_;
+  DiscreteFilter<float, float> filter_;
 
   void (* error_callback) (ErrorCodes);
 
@@ -279,7 +278,7 @@ public:
     return phase_amps;
   }
 
-  void set_filters(DiscreteFilter<float> filter)
+  void set_filters(DiscreteFilter<float, float> filter)
   {
     for (size_t i = 0; i < num_sensors_; ++i) {
       sensors_.at(i)->set_filter(filter);

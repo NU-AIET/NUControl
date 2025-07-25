@@ -1,6 +1,6 @@
 #ifndef TRANSFORMATION_HPP
 #define TRANSFORMATION_HPP
-#include "helpers.h"
+#include "helpers.hpp"
 
 template<typename T>
 struct PhaseValues
@@ -8,6 +8,43 @@ struct PhaseValues
   T a;
   T b;
   T c;
+
+  PhaseValues() = default;
+  ~PhaseValues() = default;
+
+  // Standard constructor 
+  PhaseValues(T a_, T b_, T c_)
+  : a(a_),
+    b(b_),
+    c(c_)
+  {}
+
+  // Constructor for compatabilitiy with DiscreteFilter
+  PhaseValues(T val)
+  : a(val),
+    b(val),
+    c(val)
+  {}
+
+  PhaseValues<T>& operator+=(const PhaseValues<T> & other)
+  {
+    a += other.a;
+    b += other.b;
+    c += other.c;
+    return *this;
+  }
+
+  PhaseValues<T>& operator-=(const PhaseValues<T> & other)
+  {
+    a -= other.a;
+    b -= other.b;
+    c -= other.c;
+    return *this;
+  }
+
+
+
+
 };
 
 template<typename T>
@@ -22,6 +59,35 @@ struct QuadDirectValues
 {
   T q;
   T d;
+
+  QuadDirectValues() = default;
+  ~QuadDirectValues() = default;
+
+  // Standard constructor 
+  QuadDirectValues(T q_, T d_)
+  : q(q_),
+    d(d_)
+  {}
+
+  // Constructor for compatabilitiy with DiscreteFilter
+  QuadDirectValues(T val)
+  : q(val),
+    d(val)
+  {}
+
+  QuadDirectValues<T>& operator+=(const QuadDirectValues<T> & other)
+  {
+    q += other.q;
+    d += other.d;
+    return *this;
+  }
+
+  QuadDirectValues<T>& operator-=(const QuadDirectValues<T> & other)
+  {
+    q -= other.q;
+    d -= other.d;
+    return *this;
+  }
 };
 
 template<typename T>
@@ -47,7 +113,6 @@ PhaseValues<T> operator-(PhaseValues<T> phs_a, PhaseValues<T> phs_b)
 {
   return {phs_a.a - phs_b.a, phs_a.b - phs_b.b, phs_a.c - phs_b.c};
 }
-
 
 template<typename T>
 QuadDirectValues<T> operator*(QuadDirectValues<T> qd, T s)

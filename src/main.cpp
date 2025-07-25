@@ -2,7 +2,6 @@
 #include <TeensyTimerTool.h>
 #include <vector>
 #include <math.h>
-#include "filter.hpp"
 #include "current_sense.hpp"
 #include "driver.hpp"
 #include "transformations.hpp"
@@ -35,23 +34,21 @@ BrushlessController controller_{EC45_Flat, GateDriver, Current_Sensors, Encoder}
 
 // const float MAX_VOLT = 2.f;
 
-Butterworth2 spring_filter{1000, 10000};
-
 float zero_ang_ = 0.f;
 float kappa = 1.0f;
 float c = 0.01;
 
 // Butterworth2 spring_filter{100, 10000};
 
-void spring()
-{
-  float diff = zero_ang_ - (controller_.get_shaft_angle());
-  if (abs(diff) < 0.01) {
-    diff = 0;
-  }
-  float torque = spring_filter.filter(kappa * diff);
-  controller_.set_target(std::clamp(torque, -0.1f, 0.1f));
-}
+// void spring()
+// {
+//   float diff = zero_ang_ - (controller_.get_shaft_angle());
+//   if (abs(diff) < 0.01) {
+//     diff = 0;
+//   }
+//   float torque = spring_filter.filter(kappa * diff);
+//   controller_.set_target(std::clamp(torque, -0.1f, 0.1f));
+// }
 
 void panic(TeensyTimerTool::errorCode err)  // print out error code, stop everything and do a fast blink
 {
@@ -106,7 +103,7 @@ void setup()
     exit(0);
   }
 
-  controller_.set_e_angle_offset(1.20f);
+  controller_.set_e_angle_offset(0.97f);
 
   Serial.println("Preparing to run");
   delay(1000);
@@ -118,7 +115,7 @@ void setup()
   // float force = 2.f;
   // constexpr float radius = 42.f / 1000.f * 0.5f;
   controller_.set_target(0.f);
-  // controller_.set_e_angle_offset(1.18);
+  // controller_.set_e_angle_offset(0.97);
 
   // controller_.start_print(10);
   controller_.start_control(100);
