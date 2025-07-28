@@ -6,17 +6,8 @@
 #include "transformations.hpp"
 #include "spi_encoder.hpp"
 #include "discrete_filter.hpp"
+#include "motors.hpp"
 
-struct MotorParameters
-{
-  int pole_pairs;
-  float phase_R;   // Ohm = Single Phase Resistance
-  float phase_L;   // Ohm *s = Henry = Single Phase Inductance
-  float SAFE_CURRENT;   // A = I can use this all the time and it will be okay
-  float MAX_CURRENT;   // A = I can only use this for a short period
-  float kT;   // Nm / A
-  float kV;   // V / rad /s
-};
 
 enum ControllerMode
 {

@@ -37,5 +37,14 @@ void handle_errors(ErrorCodes code)
   exit(0);
 }
 
+void timer_errors(TeensyTimerTool::errorCode err)  // print out error code, stop everything and do a fast blink
+{
+  Serial.printf("Timer Error %d\n", err);
+  Serial.flush();
+  delay(1000);
+  exit(0);
+}
+
+
 
 #endif
