@@ -38,7 +38,7 @@ public:
     Ki_ = motor_.phase_R * _2_PI_ * 25.f; // Ohms * s = Vs / A
     set_feedback_filter(PIController<QuadDirectValues<float>>(Kp_, Ki_, control_period_s_));
     MAX_VOLT_ = 1.5f * motor_.phase_R * motor_.MAX_CURRENT;
-    set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_vel_, filter_cutoff_freq_hz_fb_);
+    set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_current_, filter_cutoff_freq_hz_fb_);
   }
 
   void set_filters(float cutoff_freq_hz, float filter_cutoff_freq_hz_current, float filter_cutoff_freq_hz_fb)
@@ -63,13 +63,13 @@ public:
     ctrl_mode_ = ctrl_mode;
   }
 
-  void start_control(int control_period_us)
+  void start_control(int control_period_us, bool use_internal_timer=true)
   {
     control_period_us_ = control_period_us;
     control_period_s_ = control_period_us_ * 1e-6;
     control_freq_hz_ = 1.f / control_period_s_;
 
-    set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_vel_, filter_cutoff_freq_hz_fb_);
+    set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_current_, filter_cutoff_freq_hz_fb_);
 
     last_vel_angle_ = 0.f;
     shaft_velocity_ = 0.f;
@@ -84,10 +84,13 @@ public:
     start_time_ = micros() * 1e-6f;
     driver_.enable();
 
-    ctrl_timer_.begin(
-      [this] {
-        control_step();
-      }, control_period_us_);
+    if(use_internal_timer)
+    {
+      ctrl_timer_.begin(
+        [this] {
+          control_step();
+        }, control_period_us_);
+    }
   }
 
   void stop_control()
@@ -118,7 +121,7 @@ public:
   {
     auto ret_d = driver_.init();
     auto ret_cs = cs_.init_sensors();
-    set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_vel_, filter_cutoff_freq_hz_fb_);
+    set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_current_, filter_cutoff_freq_hz_fb_);
 
     return ret_d & ret_cs;
 
@@ -186,7 +189,7 @@ public:
       // Send voltage to pull the driver towards the zero electrical angle
       // May perform worse on motors with lots of friction, cogging, or other impedances
       driver_.enable();
-      auto phase_volts = quaddirect_to_phases<float>({0.5f, 0.f}, 1.5f * PI);
+      auto phase_volts = quaddirect_to_phases<float>({motor_.phase_R * motor_.SAFE_CURRENT, 0.f}, 1.5f * PI);
       driver_.set_phase_voltages(center_phase_voltages(phase_volts));
       delay(700);
       // do{
@@ -214,6 +217,7 @@ public:
   void set_e_angle_offset(float e_ang)
   {
     e_ang_offset_ = e_ang;
+    Serial.println(motor_.phase_L * 1000.f * 1000.f, 4);
   }
 
   float get_shaft_angle() const
@@ -294,7 +298,7 @@ public:
           float back_emf = motor_.kV * target_;
 
           auto phase_volts =
-            quaddirect_to_phases<float>({0.5f + back_emf, 0.f}, get_eangle(open_loop_shaft_angle_));
+            quaddirect_to_phases<float>({motor_.phase_R * motor_.SAFE_CURRENT + back_emf, 0.f}, get_eangle(open_loop_shaft_angle_));
           auto cntr_volts = center_phase_voltages(phase_volts);
           driver_.set_phase_voltages(cntr_volts);
         }
@@ -317,15 +321,12 @@ public:
 
           // Pump controllers
           auto ff_volts = feedforward(desr_current);
-          auto fb_volts = feedback(desr_current);
-          // fb_voltage_.at(i_) = fb_volts;
+          // auto fb_volts = feedback(desr_current);
           auto bemf_volts = back_emf_decoupler();
 
-          const auto dr_volts =
-            center_phase_voltages(filter_phase_voltages(ff_volts+bemf_volts+fb_volts)) +
-            PhaseValues<float>{1.f, 1.f, 1.f};
+          const auto dr_volts = center_phase_voltages(filter_phase_voltages(ff_volts+bemf_volts)) + PhaseValues<float>{1.f, 1.f, 1.f};
 
-          desr_voltage_.at(i_) = dr_volts;
+          // desr_voltage_.at(i_) = dr_volts;
 
           driver_.set_phase_voltages(dr_volts);
         }
@@ -447,23 +448,23 @@ private:
 
   void control_step()
   {
-    float now = micros() * 1e-6f - start_time_;
+    // float now = micros() * 1e-6f - start_time_;
     // float w = afreq(now);
-    float req_curr = 1.0f;
-    target_ = motor_.kT * req_curr;
-    time_.at(i_) = now;
-    ref_current_.at(i_) = req_curr;
+    // float req_curr = 0.f; //0.5f * sinf(w * now);
+    // target_ = motor_.kT * req_curr;
+    // time_.at(i_) = now;
+    // ref_current_.at(i_) = req_curr;
     update_sensors();
     update_control();
-    meas_current_.at(i_) = quaddirect_currents_;
+    // Serial.println(shaft_velocity_);
+    // meas_current_.at(i_) = quaddirect_currents_;
 
-    ++i_;
+    // ++i_;
 
-    if (i_ >= max_size) {
-      stop_control();
-      data_out();
-
-    }
+    // if (i_ >= max_size) {
+    //   stop_control();
+    //   data_out();
+    // }
   }
 
   void data_out()

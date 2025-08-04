@@ -249,7 +249,7 @@ public:
     }
 
     if (phase_idx_.a > -1) {
-      phase_amps.a = phase_dirs_.c * amps.at(phase_idx_.a);
+      phase_amps.a = phase_dirs_.a * amps.at(phase_idx_.a);
     }
     if (phase_idx_.b > -1) {
       phase_amps.b = phase_dirs_.b * amps.at(phase_idx_.b);

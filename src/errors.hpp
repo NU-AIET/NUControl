@@ -14,6 +14,9 @@ enum WarningCodes{
 enum ErrorCodes
 {
   CURRENT_SENSE_OVER_LIMIT,
+  DRIVER_INIT_FAIL,
+  CURRENT_SENSE_INIT_FAIL,
+  CURRENT_SENSE_ALIGN_FAIL,
 
 };
 
@@ -25,6 +28,16 @@ void print_errors(ErrorCodes code)
 
       Serial.println("Current sensor exceeds safe limit");
       Serial.flush();
+    case ErrorCodes::CURRENT_SENSE_INIT_FAIL:
+      Serial.println("Current sensors failed to initialize");
+      Serial.flush();
+    case ErrorCodes::DRIVER_INIT_FAIL:
+      Serial.println("Gate driver failed to initialize");
+      Serial.flush();
+    case ErrorCodes::CURRENT_SENSE_ALIGN_FAIL:
+      Serial.println("Current sensors failed to align to phases");
+      Serial.flush();
+    
       return;
   }
 
