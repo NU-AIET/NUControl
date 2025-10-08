@@ -11,6 +11,7 @@
 #include "motor_controller.hpp"
 #include "spi_encoder.hpp"
 #include "transformations.hpp"
+#include "cogging_comp.hpp"
 #include "userConfig.h"
 
 #endif

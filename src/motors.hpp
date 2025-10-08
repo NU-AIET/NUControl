@@ -14,9 +14,10 @@ struct MotorParameters
 
 // Note: Maybe mulitply kV by 0.5;
 MotorParameters EC45_Flat{8, 0.2992f, 111.f * 1e-6f, 3.f, 8.f, 0.034f, 0.0369};
+// MotorParameters EC45_Flat{8, 0.2992f, 0.f, 3.f, 8.f, 0.034f, 0.0369};
 
 MotorParameters U2535{7, 0.72487f, 510.f * 1e-6f, 3.f, 9.f, 0.040f, 0.001f};
-
+// MotorParameters U2535{7, 0.72487f, 0.f, 3.f, 9.f, 0.040f, 0.001f};
 
 
 #endif

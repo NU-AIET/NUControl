@@ -4,9 +4,10 @@
 
 
 // Implement warnings?
-enum WarningCodes{
-    CURRENT_SENSE_SATURATION,
-    DRIVER_VOLTAGE_EXCEEDS_USER_LIMIT,
+enum WarningCodes
+{
+  CURRENT_SENSE_SATURATION,
+  DRIVER_VOLTAGE_EXCEEDS_USER_LIMIT,
 
 };
 
@@ -37,7 +38,7 @@ void print_errors(ErrorCodes code)
     case ErrorCodes::CURRENT_SENSE_ALIGN_FAIL:
       Serial.println("Current sensors failed to align to phases");
       Serial.flush();
-    
+
       return;
   }
 
@@ -57,7 +58,6 @@ void timer_errors(TeensyTimerTool::errorCode err)  // print out error code, stop
   delay(1000);
   exit(0);
 }
-
 
 
 #endif

@@ -43,7 +43,7 @@ public:
     return sum_;
   }
 
-  void reset(T input_fill=static_cast<T>(0.f), T output_fill=static_cast<T>(0.f))
+  virtual void reset(T input_fill = static_cast<T>(0.f), T output_fill = static_cast<T>(0.f))
   {
     inputs_ = std::deque<T>(inputs_num_, static_cast<T>(input_fill));
     outputs_ = std::deque<T>(outputs_num_, static_cast<T>(output_fill));
@@ -68,7 +68,8 @@ public:
   ~Butterworth2nd() = default;
 
   Butterworth2nd(float cutoff_hz, float sampling_hz)
-  : DiscreteFilter<T, float>(input_coeffs(cutoff_hz, sampling_hz), output_coeffs(cutoff_hz, sampling_hz))
+  : DiscreteFilter<T, float>(input_coeffs(cutoff_hz, sampling_hz),
+      output_coeffs(cutoff_hz, sampling_hz))
   {}
 
   // T update(T new_input) {DiscreteFilter<T>::update(new_input);}
@@ -102,7 +103,8 @@ public:
   ~PIController() = default;
 
   PIController(float Kp, float Ki, float control_period_s)
-  : DiscreteFilter<T, float>({Kp + 0.5f * Ki * control_period_s, -Kp + 0.5f * Ki * control_period_s},
+  : DiscreteFilter<T, float>({Kp + 0.5f * Ki * control_period_s,
+        -Kp + 0.5f * Ki * control_period_s},
       {-1.f})
   {}
 };
@@ -113,7 +115,8 @@ class MotorFeedforward : public DiscreteFilter<PhaseValues<float>, float>
   ~MotorFeedforward() = default;
 
   MotorFeedforward(float phase_R, float phase_L, float control_period_s)
-  : DiscreteFilter<PhaseValues<float>, float>({2.f * phase_L / control_period_s + phase_R, -2.f * phase_L / control_period_s + phase_R}, {1.f})
+  : DiscreteFilter<PhaseValues<float>, float>({2.f * phase_L / control_period_s + phase_R,
+        -2.f * phase_L / control_period_s + phase_R}, {1.f})
   {}
 
 };

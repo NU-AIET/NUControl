@@ -12,7 +12,7 @@ struct PhaseValues
   PhaseValues() = default;
   ~PhaseValues() = default;
 
-  // Standard constructor 
+  // Standard constructor
   PhaseValues(T a_, T b_, T c_)
   : a(a_),
     b(b_),
@@ -26,7 +26,7 @@ struct PhaseValues
     c(val)
   {}
 
-  PhaseValues<T>& operator+=(const PhaseValues<T> & other)
+  PhaseValues<T> & operator+=(const PhaseValues<T> & other)
   {
     a += other.a;
     b += other.b;
@@ -34,15 +34,13 @@ struct PhaseValues
     return *this;
   }
 
-  PhaseValues<T>& operator-=(const PhaseValues<T> & other)
+  PhaseValues<T> & operator-=(const PhaseValues<T> & other)
   {
     a -= other.a;
     b -= other.b;
     c -= other.c;
     return *this;
   }
-
-
 
 
 };
@@ -63,7 +61,7 @@ struct QuadDirectValues
   QuadDirectValues() = default;
   ~QuadDirectValues() = default;
 
-  // Standard constructor 
+  // Standard constructor
   QuadDirectValues(T q_, T d_)
   : q(q_),
     d(d_)
@@ -75,14 +73,14 @@ struct QuadDirectValues
     d(val)
   {}
 
-  QuadDirectValues<T>& operator+=(const QuadDirectValues<T> & other)
+  QuadDirectValues<T> & operator+=(const QuadDirectValues<T> & other)
   {
     q += other.q;
     d += other.d;
     return *this;
   }
 
-  QuadDirectValues<T>& operator-=(const QuadDirectValues<T> & other)
+  QuadDirectValues<T> & operator-=(const QuadDirectValues<T> & other)
   {
     q -= other.q;
     d -= other.d;
