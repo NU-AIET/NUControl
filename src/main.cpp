@@ -28,8 +28,10 @@ constexpr float DRIVER_VOLTAGE = 24.f;
 BrushlessDriver Driver1{{3, 4, 5}, 2, PWM_FREQ, PWM_RES, DRIVER_VOLTAGE};
 BrushlessDriver Driver2{{7, 8, 9}, 6, PWM_FREQ, PWM_RES, DRIVER_VOLTAGE};
 
-SPIEncoder Encoder1{SPI, 10};
-SPIEncoder Encoder2{SPI1, 0};
+uint16_t EncoderReadCmd = (0b11 << 14) | 0x3FFF;
+
+SPIEncoder Encoder1{EncoderReadCmd, SPI, 10};
+SPIEncoder Encoder2{EncoderReadCmd, SPI1, 0};
 
 BrushlessController MosracController{U2535, Driver1, CS1, Encoder1};
 BrushlessController MaxonController{EC45_Flat, Driver2, CS2, Encoder2};

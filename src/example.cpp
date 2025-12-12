@@ -20,6 +20,7 @@
 
 // BrushlessDriver GateDriver{{2, 3, 4}, 1, PWM_FREQ, PWM_RES, DRIVER_VOLTAGE};
 
+// const uint16_t EncoderReadCmd = (0b11 << 14) | 0x3FFF;
 // SPIEncoder Encoder{SPI, 10};
 
 // BrushlessController controller_{EC45_Flat, GateDriver, Current_Sensors, Encoder};
