@@ -9,6 +9,7 @@
 
 #include "motors.hpp"
 #include "motor_controller.hpp"
+#include "encoder.hpp"
 #include "spi_encoder.hpp"
 #include "transformations.hpp"
 #include "cogging_comp.hpp"
