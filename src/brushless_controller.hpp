@@ -38,7 +38,7 @@ public:
   {
     Kp_ = motor_.phase_L * _2_PI_ * 25.f; // Ohms = V / A
     Ki_ = motor_.phase_R * _2_PI_ * 25.f; // Ohms * s = Vs / A
-    set_feedback_filter(PIController<QuadDirectValues<float>>(Kp_, Ki_, control_period_s_));
+    set_feedback_control(PIController<QuadDirectValues<float>>(Kp_, Ki_, control_period_s_));
     MAX_VOLT_ = 1.5f * motor_.phase_R * motor_.MAX_CURRENT;
     set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_current_, filter_cutoff_freq_hz_fb_);
   }
@@ -115,18 +115,11 @@ public:
       }, print_period_ms * 1000);
   }
 
-  void set_feedback_filter(DiscreteFilter<QuadDirectValues<float>, float> fb_filter)
-  {
-    feedback_ = fb_filter;
-  }
+  void set_feedback_control(DiscreteFilter<QuadDirectValues<float>, float> fb_filter) { feedback_ = fb_filter; }
 
-  void set_velocity_filter(DiscreteFilter<float, float> vel_filter) {
-    vel_filter_ = vel_filter;
-  }
+  void set_velocity_filter(DiscreteFilter<float, float> vel_filter) { vel_filter_ = vel_filter; }
 
-  void set_position_filter(DiscreteFilter<float, float> pos_filter) { 
-    pos_filter_ = pos_filter;
-  }
+  void set_position_filter(DiscreteFilter<float, float> pos_filter) { pos_filter_ = pos_filter; }
 
   void stop_print()
   {
@@ -144,10 +137,14 @@ public:
 
   }
 
-  bool align_sensors(int dir = 0, bool skip_eang = false)
+  bool align_sensors(bool e_angle_align = true)
   {
 
     auto ret = cs_.align_sensors(driver_);
+
+    if(!e_angle_align) {
+      return ret;
+    }
 
     delay(1000);
 
@@ -197,7 +194,6 @@ public:
     }
   }
 
-
     driver_.enable();
     open_loop_shaft_angle_ = 0.f;
     open_loop_shaft_velocity_ = 0.f;
@@ -227,19 +223,25 @@ public:
     return ret;
   }
 
-  void set_encoder_offset(float offset) { encoder_offset_ = offset; }
-
   float get_encoder_offset() const { return encoder_offset_; }
-
   float get_shaft_angle() const { return shaft_angle_; }
-
   float get_shaft_radians() const { return normalize_angle(shaft_angle_); }
-
   float get_encoder_angle() const { return encoder_angle.get_full_angle(); }
-
   float get_encoder_radians() const { return encoder_angle.get_angle(); }
-
   float get_shaft_velocity() const { return shaft_velocity_; }
+
+  void set_encoder_direction(int dir) {
+    if(dir == 1){ pos_sensor_dir_= 1; return;}
+    if(dir == -1){ pos_sensor_dir_= -1; return;}
+    else{
+      Serial.println("Error: Invalid Direction. Please use 1 or -1");
+      return;
+    }
+    
+  }
+  void set_encoder_offset(float offset) { encoder_offset_ = offset; }
+  void set_calibration_scan_speed(float w) { calibration_scan_speed_ = w;}
+  void set_calibration_scan_range (float rads) {calibration_scan_distance_ = rads;}
 
   void enable_anticog(const std::vector<float> & map)
   {
@@ -310,10 +312,12 @@ public:
       case ControllerMode::TORQUE:
         {
 
+          
+
+          // Add in cogging torque if needed 
+          if (anticog_enable_) { target_ += get_cogging_torque(shaft_angle_ - cogging_offset_, anticog_map_); }
+
           // Convert requested torque into a current request
-
-          // if (anticog_enable_) { target_ += get_cogging_torque(shaft_angle_ - cogging_offset_, anticog_map_); }
-
           float requested_current = target_ / motor_.kT;
 
           // Let's limit to the stall current of the motor
@@ -334,10 +338,13 @@ public:
           auto filtered_ctrl_volts = filter_phase_voltages(ctrl_volts);
 
 
-          // if(anticog_volt_enable_){
-          //   filtered_ctrl_volts += get_cogging_voltage(shaft_angle_ - cogging_offset_, anticog_volt_map_);
-          // }
+          // We don't want to filter this as this is a real thing
+          // Although, unless your motor had an insane pole pair count(> 500), the filters should not catch this
+          if(anticog_volt_enable_){
+            filtered_ctrl_volts += get_cogging_voltage(shaft_angle_ - cogging_offset_, anticog_volt_map_);
+          }
 
+          // Shift all voltages by 1 to avoid setting PWM pin to 0 as it will switch to digital and cause delays
           const auto dr_volts = center_phase_voltages(filtered_ctrl_volts) + PhaseValues<float>{1.f, 1.f, 1.f};
           
           last_phase_volts_ = dr_volts;
@@ -374,7 +381,6 @@ private:
 
   float calibration_scan_speed_ = PI;
   float calibration_scan_distance_ = 0.25f * PI;
-
 
 
   /// \note: Position / State Variables
