@@ -32,6 +32,10 @@ public:
       sum_ += (input_coeffs_.at(i) * inputs_.at(i));
     }
 
+    if(outputs_num_ == 0) {
+      return sum_;
+    }
+
     for (size_t j = 0; j < outputs_num_; ++j) {
       sum_ -= (output_coeffs_.at(j) * outputs_.at(j));
     }

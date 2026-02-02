@@ -34,26 +34,21 @@ void setup()
 
   Serial.println("Hell yeah!");
 
-  auto ret_init = controller_.init_components();
-  if (!ret_init) {
+  if (!controller_.init_components()) {
     Serial.println("Motor controller component failed to init");
     exit(0);
   }
   Serial.println("Aligning");
 
-  auto ret_align = controller_.align_sensors(true, true);
-  if (!ret_align) {
+  if (!controller_.align_sensors()) {
     Serial.println("Motor controller component failed to align");
     exit(0);
   }
-
-  controller_.set_e_angle_offset(0.97f);
 
   Serial.println("Preparing to run");
   delay(1000);
 
   controller_.set_control_mode(ControllerMode::TORQUE);
-
   controller_.set_target(0.f);
 
   controller_.start_control(100);

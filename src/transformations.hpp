@@ -159,7 +159,7 @@ PhaseValues<T> alphabeta_to_phases(AlphaBetaValues<T> alphabeta)
 template<typename T>
 QuadDirectValues<T> alphabeta_to_quaddirect(AlphaBetaValues<T> alphabeta, float eangle_rads)
 {
-  auto sc = sincos(eangle_rads);
+  auto sc = nu_sincos(eangle_rads);
   return {-sc.first * alphabeta.alpha + sc.second * alphabeta.beta,
     sc.second * alphabeta.alpha + sc.first * alphabeta.beta};
 }
@@ -167,7 +167,7 @@ QuadDirectValues<T> alphabeta_to_quaddirect(AlphaBetaValues<T> alphabeta, float 
 template<typename T>
 AlphaBetaValues<T> quaddirect_to_alphabeta(QuadDirectValues<T> quaddirect, float eangle_rads)
 {
-  auto sc = sincos(eangle_rads);
+  auto sc = nu_sincos(eangle_rads);
   return {sc.second * quaddirect.d - sc.first * quaddirect.q,
     sc.first * quaddirect.d + sc.second * quaddirect.q};
 }
