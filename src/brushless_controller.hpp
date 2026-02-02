@@ -94,6 +94,7 @@ public:
     driver_.enable();
 
     if (use_internal_timer) {
+      internal_timer_on_ = true;
       ctrl_timer_.begin(
         [this] {
           control_step();
@@ -103,7 +104,10 @@ public:
 
   void stop_control()
   {
-    ctrl_timer_.stop();
+    if(internal_timer_on_){
+      internal_timer_on_ = false;
+      ctrl_timer_.stop();
+      }
     driver_.disable();
   }
 
@@ -156,7 +160,7 @@ public:
     set_control_mode(ControllerMode::OPEN_LOOP_VELOCITY);
     target_ = calibration_scan_speed_;
 
-    driver_.enable();
+    start_control(1000, false);
 
     update_sensors();
 
@@ -174,7 +178,7 @@ public:
 
     target_ = 0.f;
     update_control();
-    driver_.disable();
+    stop_control();
 
     Serial.println("Forward Move Complete");
     Serial.flush();
@@ -194,7 +198,7 @@ public:
     }
   }
 
-    driver_.enable();
+    start_control(1000, false);
     open_loop_shaft_angle_ = 0.f;
     open_loop_shaft_velocity_ = 0.f;
     target_ = -calibration_scan_speed_;
@@ -212,7 +216,7 @@ public:
 
     target_ = 0.f;
     update_control();
-    driver_.disable();
+    stop_control();
 
     set_control_mode(ControllerMode::DISABLE);
 
@@ -411,6 +415,8 @@ private:
   bool feedforward_enable_ = true;
   bool feedback_enable_ = true;
   bool back_emf_enable_ = true;
+
+  bool internal_timer_on_;
 
   /// \note: Feedback controller variables
   float Kp_;
