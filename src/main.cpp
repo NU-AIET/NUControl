@@ -36,69 +36,6 @@ SPIEncoder Encoder2{EncoderReadCmd, SPI1, 0};
 BrushlessController MosracController{U2535, Driver1, CS1, Encoder1};
 BrushlessController MaxonController{EC45_Flat, Driver2, CS2, Encoder2};
 
-// CoggingMapper cogging_mapper{MosracController};
-
-
-// const std::vector<float> MosracCoggingMap
-// {
-//   #include "anticogging_map.csv"
-// };
-
-// const PhaseValues<std::vector<float>> MosracVoltageCoggingMap
-// {
-//   {
-//     #include "anticogging_map_va.csv"
-//     },
-//   {
-//     #include "anticogging_map_vb.csv"
-//     },
-//   {
-//     #include "anticogging_map_vc.csv"
-//     }
-// };
-
-
-// // int i = 0;
-
-float mosrac_zero_angle = 0.f;
-float maxon_zero_angle = 0.f;
-// float kappa = 1.f;
-// float charlie = 0.07f;
-
-// // K = 5, C = 0.11
-// // K = 7, C = 0.07
-
-float freq = 10000.f;
-
-// std::vector<float> vel_coeffs_{freq * 0.63519814f, freq * -0.01476301f, freq * -0.31721057f, freq * -0.36169386f, freq * -0.23776224f,
-//                               freq * -0.03496503f, freq * 0.15714841f, freq * 0.24902875f, freq * 0.15112665f, freq *-0.22610723f};
-
-// std::vector<float> vel_coeffs_{2150.38584472, 1062.24058129, 239.71324912, -345.89884705, -723.29840246
-// , -921.18811236, -968.270672, -893.24877662, -724.82512146, -491.70240178
-// , -222.58331282, 53.82945016, 308.83319194, 513.72521725, 639.80283085
-// , 658.3633375, 540.70404194, 258.12224894, -218.08473676, -916.6196104 };
-
-// std::vector<float> vel_coeffs_{111.96807859, 100.74348383, 90.03196267, 79.8236715, 70.10876667
-// , 60.87740458, 52.11974159, 43.82593409, 35.98613845, 28.59051104
-// , 21.62920823, 15.09238642, 8.97020196, 3.25281125, -2.06962936
-// , -7.00696348, -11.56903473, -15.76568674, -19.60676314, -23.10210754
-// , -26.26156358, -29.09497488, -31.61218506, -33.82303774, -35.73737655
-// , -37.36504512, -38.71588706, -39.79974601, -40.62646558, -41.20588941
-// , -41.54786111, -41.66222431, -41.55882263, -41.24749971, -40.73809915
-// , -40.04046459, -39.16443966, -38.11986796, -36.91659314, -35.56445881
-// , -34.0733086, -32.45298613, -30.71333503, -28.86419891, -26.91542141
-// , -24.87684616, -22.75831676, -20.56967685, -18.32077006, -16.02144
-// , -13.6815303, -11.31088458, -8.91934648, -6.51675961, -4.11296759
-// , -1.71781406, 0.65885737, 3.00720307, 5.31737941, 7.57954278
-// , 9.78384954, 11.92045607, 13.97951875, 15.95119396, 17.82563807
-// , 19.59300745, 21.24345849, 22.76714755, 24.15423101, 25.39486526
-// , 26.47920666, 27.39741159, 28.13963642, 28.69603754, 29.05677131
-// , 29.21199412, 29.15186234, 28.86653234, 28.3461605, 27.5809032
-// , 26.56091681, 25.27635771, 23.71738227, 21.87414687, 19.73680789
-// , 17.2955217, 14.54044467, 11.46173319, 8.04954362, 4.29403235
-// , 0.18535575, -4.28632981, -9.13086795, -14.35810229, -19.97787645
-// , -26.00003407, -32.43441877, -39.29087416, -46.57924388, -54.30937155};
-
 std::vector<float> vel_coeffs_ = {28.9734326,27.52295677,26.10537177,24.72036642,23.36762954
 ,22.04684994,20.75771642,19.49991782,18.27314293,17.07708058
 ,15.91141957,14.77584873,13.67005687,12.5937328,11.54656533
@@ -146,8 +83,40 @@ std::vector<float> pos_coeffs_{0.25f, 0.25f, 0.25f, 0.25f};
 
 DiscreteFilter<float, float> pos_filter{pos_coeffs_, {}};
 
+// CoggingMapper cogging_mapper{MosracController};
+
+
+// const std::vector<float> MosracCoggingMap
+// {
+//   #include "anticogging_map.csv"
+// };
+
+// const PhaseValues<std::vector<float>> MosracVoltageCoggingMap
+// {
+//   {
+//     #include "anticogging_map_va.csv"
+//     },
+//   {
+//     #include "anticogging_map_vb.csv"
+//     },
+//   {
+//     #include "anticogging_map_vc.csv"
+//     }
+// };
+
+
+// // int i = 0;
+
+float mosrac_zero_angle = 0.f;
+float maxon_zero_angle = 0.f;
+// float kappa = 1.f;
+// float charlie = 0.07f;
+
+// // K = 5, C = 0.11
+// // K = 7, C = 0.07
 
 // Butterworth2nd<float> pos_filter = Butterworth2nd<float>(5000.f, 10000.f);
+// Butterworth2nd<float> vel_filter = Butterworth2nd<float>(1000.f, 10000.f);
 // Butterworth2nd<float> spring_filter = Butterworth2nd<float>(1000.f, 10000.f);
 // Butterworth2nd<float> damper_filter = Butterworth2nd<float>(10.f, 10000.f);
 
@@ -165,7 +134,7 @@ DiscreteFilter<float, float> pos_filter{pos_coeffs_, {}};
 // float last_delta_read_ = 0.f;
 
 // void bilateral(){
-//    MosracController.update_sensors();
+//     MosracController.update_sensors();
 //     MaxonController.update_sensors();
 
 //     float mosrac_ang = (MosracController.get_shaft_angle() - mosrac_zero_angle);
@@ -238,15 +207,14 @@ DiscreteFilter<float, float> pos_filter{pos_coeffs_, {}};
 //   indexer++;
 // }
 
-
-int indx = 0;
-
 void pos_cont(){
   MaxonController.update_sensors();
-  auto ang = MaxonController.get_encoder_angle();
+  auto ang = MaxonController.get_shaft_angle();
 
 
   auto torque = std::clamp(1.f * (maxon_zero_angle - ang), EC45_Flat.kT * -3.f, EC45_Flat.kT * 3.f);
+
+  Serial.println(torque);
 
   MaxonController.set_target(torque);
   MaxonController.update_control();
@@ -271,28 +239,25 @@ void setup()
 //   Serial.println("Hell yeah!");
 
 
-  // auto ret_init = MosracController.init_components();
-  // if (!ret_init) {
+  // if (!MosracController.init_components()) {
   //   Serial.println("Motor controller component failed to init");
   //   exit(0);
   // }
   // Serial.println("Aligning");
 
-  // auto ret_align = MosracController.align_sensors(1, false);
-  // if (!ret_align) {
+  // auto ret_align = 
+  // if (!MosracController.align_sensors(1, false)) {
   //   Serial.println("Motor controller component failed to align");
   //   exit(0);
   // }
 
-  auto ret_init = MaxonController.init_components();
-  if (!ret_init) {
+  if (!MaxonController.init_components()) {
     Serial.println("Motor controller component failed to init");
     exit(0);
   }
   Serial.println("Aligning");
 
-  auto ret_align = MaxonController.align_sensors(-1, false);
-  if (!ret_align) {
+  if (!MaxonController.align_sensors(-1, false)) {
     Serial.println("Motor controller component failed to align");
     exit(0);
   }
@@ -306,21 +271,22 @@ void setup()
   MaxonController.set_control_mode(ControllerMode::TORQUE);
   MaxonController.set_target(0.f);
 
+  MaxonController.set_feedforward_state(true);
   MaxonController.set_feedback_state(false);
   MaxonController.set_back_emf_comp_state(false);
 
 
   // MosracController.enable_anticog(MosracVoltageCoggingMap);
 
-  // MaxonController.set_velocity_filter(vel_filter);
-  // MaxonController.set_position_filter(pos_filter);
+  MaxonController.set_velocity_filter(vel_filter);
+  MaxonController.set_position_filter(pos_filter);
 
 
   // MosracController.update_sensors();
   MaxonController.update_sensors();
 
   // mosrac_zero_angle = MosracController.get_shaft_angle();
-  maxon_zero_angle = MaxonController.get_encoder_angle();
+  maxon_zero_angle = MaxonController.get_shaft_angle();
 
   // MosracController.start_control(100, false);
   MaxonController.start_control(100, false);

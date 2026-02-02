@@ -146,13 +146,13 @@ public:
 
   bool align_sensors(int dir = 0, bool skip_eang = false)
   {
-    e_ang_offset_ = 0.f;
 
     auto ret = cs_.align_sensors(driver_);
 
     delay(1000);
 
     // Reset open loop angle and velocity 
+    encoder_offset_ = 0.f;
     open_loop_shaft_angle_ = 0.f;
     open_loop_shaft_velocity_ = 0.f;
 
@@ -179,14 +179,16 @@ public:
     update_control();
     driver_.disable();
 
-    Serial.println("Moving done 1");
+    Serial.println("Forward Move Complete");
     Serial.flush();
 
     if(encoder_angle.get_full_angle() > init_ang + 0.5f * calibration_scan_distance_){
       pos_sensor_dir_ = 1;
+      Serial.println("Direction is: 1");
     } else {
       if(encoder_angle.get_full_angle() < init_ang - 0.5f * calibration_scan_distance_){
         pos_sensor_dir_ = -1;
+        Serial.println("Direction is: -1");
       }
     else {
       Serial.println("Error: Sensor did not report motion");
@@ -209,7 +211,7 @@ public:
       delay(1);
     }
 
-    Serial.println("Moving done 2");
+    Serial.println("Backwards Move Complete");
     Serial.flush();
 
     target_ = 0.f;
@@ -225,9 +227,9 @@ public:
     return ret;
   }
 
-  void set_e_angle_offset(float e_ang) { e_ang_offset_ = e_ang; }
+  void set_encoder_offset(float offset) { encoder_offset_ = offset; }
 
-  float get_e_angle_offset() const { return e_ang_offset_; }
+  float get_encoder_offset() const { return encoder_offset_; }
 
   float get_shaft_angle() const { return shaft_angle_; }
 
@@ -244,7 +246,6 @@ public:
     disable_anticog();
     anticog_enable_ = true;
     anticog_map_ = map;
-
   }
 
   void enable_anticog(const PhaseValues<std::vector<float>> & map)
@@ -268,31 +269,21 @@ public:
 
   void set_back_emf_comp_state(bool state){ back_emf_enable_ = state; }
 
-  void set_cogging_offset()
-  {
-    cogging_offset_ = position_sensor_.read();
-  }
+  void set_cogging_offset(float offset){ cogging_offset_ = offset;}
 
-  PhaseValues<float> get_last_phasevolts() const
-  {
-    return last_phase_volts_;
-  }
+  void set_target(float target){ target_ = target; }
+
+
+  PhaseValues<float> get_last_phasevolts() const { return last_phase_volts_; }
 
   void update_sensors()
   {
     encoder_angle.update_angle(position_sensor_.read());
-    shaft_angle_ = (pos_sensor_dir_ * encoder_angle.get_full_angle());
-    shaft_velocity_ = vel_filter_cutoff_.update(vel_filter_.update(shaft_angle_));
-
+    shaft_angle_ = pos_filter_.update(pos_sensor_dir_ * encoder_angle.get_full_angle());
     electrical_angle_ = get_eangle(shaft_angle_);
-
+    shaft_velocity_ = vel_filter_cutoff_.update(vel_filter_.update(shaft_angle_));
     phase_currents_ = cs_.get_phase_currents(true);
     quaddirect_currents_ = phases_to_quaddirect<float>(phase_currents_, electrical_angle_);
-  }
-
-  void set_target(float target)
-  {
-    target_ = target;
   }
 
   void update_control()
@@ -309,11 +300,9 @@ public:
 
           float back_emf = motor_.kV * target_;
 
-          auto phase_volts =
-            quaddirect_to_phases<float>(
-            {motor_.phase_R * motor_.SAFE_CURRENT + back_emf, 0.f}, get_eangle(
-              open_loop_shaft_angle_));
-          auto cntr_volts = center_phase_voltages(phase_volts);
+          auto phase_volts = quaddirect_to_phases<float>({motor_.phase_R * motor_.SAFE_CURRENT + back_emf, 0.f},
+                                                         get_eangle(open_loop_shaft_angle_));
+          auto cntr_volts = center_phase_voltages(phase_volts) + PhaseValues<float>{1.f, 1.f, 1.f};;
           driver_.set_phase_voltages(cntr_volts);
         }
         return;
@@ -322,10 +311,8 @@ public:
         {
 
           // Convert requested torque into a current request
-         
 
-          if (anticog_enable_) { target_ += get_cogging_torque(shaft_angle_ - cogging_offset_, anticog_map_); }
-
+          // if (anticog_enable_) { target_ += get_cogging_torque(shaft_angle_ - cogging_offset_, anticog_map_); }
 
           float requested_current = target_ / motor_.kT;
 
@@ -344,14 +331,14 @@ public:
           if(back_emf_enable_) { ctrl_volts += back_emf_decoupler(); }
 
           //Apply filter to these controllers 
-
           auto filtered_ctrl_volts = filter_phase_voltages(ctrl_volts);
 
-          if(anticog_volt_enable_){
-            ctrl_volts += get_cogging_voltage(shaft_angle_ - cogging_offset_, anticog_volt_map_);
-          }
 
-          const auto dr_volts = center_phase_voltages(ctrl_volts) + PhaseValues<float>{1.f, 1.f, 1.f};
+          // if(anticog_volt_enable_){
+          //   filtered_ctrl_volts += get_cogging_voltage(shaft_angle_ - cogging_offset_, anticog_volt_map_);
+          // }
+
+          const auto dr_volts = center_phase_voltages(filtered_ctrl_volts) + PhaseValues<float>{1.f, 1.f, 1.f};
           
           last_phase_volts_ = dr_volts;
 
@@ -394,20 +381,16 @@ private:
 
   Angle encoder_angle{0, 0.f};
   int pos_sensor_dir_ = 1;
-  float shaft_angle_ = 0.f;
-  int loops_since_tick_ = -1;
+  float shaft_angle_ = 0.f; // radians
   float shaft_velocity_ = 0.f; // rad /s
-  float last_vel_angle_ = 0.f;
-  float encoder_offset_ = 0.f;
-  float electrical_angle_ = 0.f;
+  float encoder_offset_ = 0.f; // radians
+  float electrical_angle_ = 0.f; //radians
 
   DiscreteFilter<float, float> pos_filter_{{1.f}, {}};
   DiscreteFilter<float, float> vel_filter_{{10000.f, -10000.f}, {}};
   Butterworth2nd<float> vel_filter_cutoff_ = Butterworth2nd<float>(100.f, 10000.f);
 
-  float e_ang_offset_ = 0.f; //rad = How much to subtract from mech ang to align w/ electical angle
-
-  float cogging_offset_ = 0.f;
+  float cogging_offset_ = 0.f; //radians
 
   float target_; // Units depend on control mode, either rad /s or Nm
 
@@ -435,7 +418,6 @@ private:
   /// \note: Feedforward controller variables
   PhaseValues<float> last_desr_phase_currents_{0.f, 0.f, 0.f};
   PhaseValues<float> last_desr_phase_voltages_{0.f, 0.f, 0.f};
-  PhaseValues<float> desr_phase_current_dot_{0.f, 0.f, 0.f};
 
   PhaseValues<float> last_phase_volts_{0.f, 0.f, 0.f};
 
@@ -474,6 +456,20 @@ private:
     update_control();
   }
 
+  PhaseValues<float> feedforward(QuadDirectValues<float> desr_current)
+  {
+    PhaseValues<float> desr_phase_currents = quaddirect_to_phases<float>(desr_current, electrical_angle_);
+
+    float A = 2.f * motor_.phase_L / control_period_s_ + motor_.phase_R;
+    float B = -2.f * motor_.phase_L / control_period_s_ + motor_.phase_R;
+
+    PhaseValues<float> desr_phase_voltages = A * desr_phase_currents + B * last_desr_phase_currents_ - last_desr_phase_voltages_;
+
+    last_desr_phase_voltages_ = desr_phase_voltages;
+    last_desr_phase_currents_ = desr_phase_currents;
+    return desr_phase_voltages;
+  }
+
   PhaseValues<float> feedback(QuadDirectValues<float> desr_current)
   {
     QuadDirectValues<float> error = desr_current - quaddirect_currents_;
@@ -483,20 +479,6 @@ private:
     return filter_feedback_voltages(fb_phs_v);
   }
 
-  PhaseValues<float> feedforward(QuadDirectValues<float> desr_current)
-  {
-    PhaseValues<float> desr_phase_currents = quaddirect_to_phases<float>(desr_current, electrical_angle_);
-
-    float A = 2.f * motor_.phase_L / control_period_s_ + motor_.phase_R;
-    float B = -2.f * motor_.phase_L / control_period_s_ + motor_.phase_R;
-
-    PhaseValues<float> desr_phase_voltages = A * desr_phase_currents + B *
-      last_desr_phase_currents_ - last_desr_phase_voltages_;
-
-    last_desr_phase_voltages_ = desr_phase_voltages;
-    last_desr_phase_currents_ = desr_phase_currents;
-    return desr_phase_voltages;
-  }
 
   PhaseValues<float> back_emf_decoupler()
   {
@@ -514,7 +496,6 @@ private:
     Serial.println(shaft_velocity_);
   }
 
-
   float get_eangle(float mech_ang) const
   {
     return normalize_angle(static_cast<float>(motor_.pole_pairs) * (mech_ang - encoder_offset_));
@@ -522,7 +503,6 @@ private:
 
   PhaseValues<float> center_phase_voltages(PhaseValues<float> phase_volts) const
   {
-
     float _min = min(phase_volts.a, min(phase_volts.b, phase_volts.c));
 
     PhaseValues<float> offset_volts{_min, _min, _min};
