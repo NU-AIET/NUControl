@@ -19,7 +19,7 @@ public:
   /// @param driver_volts - The high voltage side of the driver
   /// @param max_voltage - Imposed limit lower than high side voltage
   BrushlessDriver(
-    const PhaseValues<int> pins, int enable, float PWM_freq = 200000.f, int PWM_res = 8,
+    const PhaseValues<int> pins, int enable, float PWM_freq = 20000.f, int PWM_res = 8,
     float driver_volts = 24.f, float max_voltage = 24.f)
   : pins_(pins),
     enable_pin_(enable),

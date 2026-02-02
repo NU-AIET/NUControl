@@ -43,6 +43,11 @@ struct Angle
     radians = new_radians;
   }
 
+  void reset() {
+    rotations = 0;
+    radians = 0.f;
+  }
+
 };
 
 

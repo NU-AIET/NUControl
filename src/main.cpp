@@ -158,6 +158,17 @@ void update()
   indexer++;
 }
 
+void pos_cont(){
+  MaxonController.update_sensors();
+  auto ang = MaxonController.get_shaft_angle();
+
+
+  auto torque = std::clamp(1.f * (maxon_zero_angle - ang), EC45_Flat.kT * -3.f, EC45_Flat.kT * 3.f);
+
+  MaxonController.set_target(torque);
+  MaxonController.update_control();
+}
+
 void setup()
 {
   while (!Serial) {}
@@ -181,18 +192,18 @@ void setup()
   //   exit(0);
   // }
 
-  // ret_init = MaxonController.init_components();
-  // if (!ret_init) {
-  //   Serial.println("Motor controller component failed to init");
-  //   exit(0);
-  // }
-  // Serial.println("Aligning");
+  auto ret_init = MaxonController.init_components();
+  if (!ret_init) {
+    Serial.println("Motor controller component failed to init");
+    exit(0);
+  }
+  Serial.println("Aligning");
 
-  // ret_align = MaxonController.align_sensors(-1, false);
-  // if (!ret_align) {
-  //   Serial.println("Motor controller component failed to align");
-  //   exit(0);
-  // }
+  auto ret_align = MaxonController.align_sensors(-1, false);
+  if (!ret_align) {
+    Serial.println("Motor controller component failed to align");
+    exit(0);
+  }
 
   // Serial.println("Preparing to run");
   // delay(1000);
@@ -200,24 +211,25 @@ void setup()
   // MosracController.set_control_mode(ControllerMode::TORQUE);
   // MosracController.set_target(0.f);
 
-  // MaxonController.set_control_mode(ControllerMode::TORQUE);
-  // MaxonController.set_target(0.f);
+  MaxonController.set_control_mode(ControllerMode::TORQUE);
+  MaxonController.set_target(0.f);
 
   // // MosracController.enable_anticog(MosracVoltageCoggingMap);
 
   // MosracController.update_sensors();
-  // MaxonController.update_sensors();
+  MaxonController.update_sensors();
 
   // mosrac_zero_angle = MosracController.get_shaft_angle();
-  // maxon_zero_angle = MaxonController.get_shaft_angle();
+  maxon_zero_angle = MaxonController.get_shaft_angle();
 
   // MosracController.start_control(100, false);
-  // MaxonController.start_control(100, false);
+  MaxonController.start_control(100, false);
 
   // cogging_mapper.map_cogging(1);
 
-  timer_.begin(update, 100);
+  // timer_.begin(update, 100);
   // timer_.begin(bilateral, 100);
+  timer_.begin(pos_cont, 100);
 
 }
 

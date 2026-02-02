@@ -4,12 +4,12 @@
 struct MotorParameters
 {
   int pole_pairs;
-  float phase_R;   // Ohm = Single Phase Resistance
-  float phase_L;   // Ohm *s = Henry = Single Phase Inductance
-  float SAFE_CURRENT;   // A = I can use this all the time and it will be okay
-  float MAX_CURRENT;   // A = I can only use this for a short period
-  float kT;   // Nm / A
-  float kV;   // V / rad /s
+  float phase_R;   // Ohm : Single Phase Resistance (not Phase to Phase)
+  float phase_L;   // Ohm *s = Henry : Single Phase Inductance (not Phase to Phase)
+  float SAFE_CURRENT;   // A : I can use this all the time and it will be okay
+  float MAX_CURRENT;   // A : I can only use this for a short period
+  float kT;   // Nm / A : How much torque per amp
+  float kV;   // V / rad /s : Backemf
 };
 
 // Note: Maybe mulitply kV by 0.5;

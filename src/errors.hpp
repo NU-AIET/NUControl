@@ -8,7 +8,6 @@ enum WarningCodes
 {
   CURRENT_SENSE_SATURATION,
   DRIVER_VOLTAGE_EXCEEDS_USER_LIMIT,
-
 };
 
 
@@ -26,7 +25,6 @@ void print_errors(ErrorCodes code)
   switch (code) {
 
     case ErrorCodes::CURRENT_SENSE_OVER_LIMIT:
-
       Serial.println("Current sensor exceeds safe limit");
       Serial.flush();
     case ErrorCodes::CURRENT_SENSE_INIT_FAIL:

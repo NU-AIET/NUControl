@@ -1,4 +1,4 @@
-#include "motor_controller.hpp"
+#include "brushless_controller.hpp"
 
 class CoggingMapper
 {
@@ -121,7 +121,6 @@ class CoggingMapper
             }
         }
         }
-
 
         void report_out()
         {

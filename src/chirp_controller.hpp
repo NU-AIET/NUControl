@@ -1,6 +1,6 @@
 #ifndef CHIRP_CONTROL_HPP
 #define CHIRP_CONTROL_HPP
-#include "motor_controller.hpp"
+#include "brushless_controller.hpp"
 
 
 class ChirpController
