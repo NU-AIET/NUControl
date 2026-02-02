@@ -4,11 +4,10 @@
 #include "driver.hpp"
 #include "current_sense.hpp"
 #include "transformations.hpp"
-#include "spi_encoder.hpp"
+#include "encoder.hpp"
 #include "discrete_filter.hpp"
 #include "motors.hpp"
 #include "anticogging_mapper.hpp"
-
 
 enum ControllerMode
 {
@@ -27,7 +26,7 @@ public:
     MotorParameters motor,
     BrushlessDriver & motor_driver,
     InlineCurrentSensorPackage & current_sensors,
-    SPIEncoder & pos_sensor)
+    AbsoluteEncoder & pos_sensor)
   : motor_(motor),
     driver_(motor_driver),
     cs_(current_sensors),
@@ -88,8 +87,6 @@ public:
 
     last_desr_phase_currents_ = PhaseValues<float>{0.f, 0.f, 0.f};
     last_desr_phase_voltages_ = PhaseValues<float>{0.f, 0.f, 0.f};
-
-    start_time_ = micros() * 1e-6f;
     driver_.enable();
 
     if (use_internal_timer) {
@@ -246,7 +243,7 @@ public:
   void enable_anticog(const std::vector<float> & map)
   {
     disable_anticog();
-    anticog_ = true;
+    anticog_enable_ = true;
     anticog_map_ = map;
 
   }
@@ -254,16 +251,28 @@ public:
   void enable_anticog(const PhaseValues<std::vector<float>> & map)
   {
     disable_anticog();
-    anticog_volt_ = true;
+    anticog_volt_enable_ = true;
     anticog_volt_map_ = map;
   }
 
   void disable_anticog()
   {
-    anticog_volt_ = false;
-    anticog_ = false;
+    anticog_volt_enable_ = false;
+    anticog_enable_ = false;
     anticog_map_ = default_anticog_map;
     anticog_volt_map_ = default_anticog_volt_map;
+  }
+
+  void set_feedforward_state(bool state){
+    feedforward_enable_ = state;
+  }
+
+  void set_feedback_state(bool state){
+    feedback_enable_ = state;
+  }
+
+  void set_back_emf_comp_state(bool state){
+    back_emf_enable_ = state;
   }
 
   void set_cogging_offset()
@@ -346,6 +355,11 @@ public:
         {
 
           // Convert requested torque into a current request
+         
+
+          if (anticog_enable_) { target_ += get_cogging_torque(mechanical_angle_ - cogging_offset_, anticog_map_); }
+
+
           float requested_current = target_ / motor_.kT;
 
           if (anticog_) {
@@ -355,19 +369,22 @@ public:
 
           // Let's limit to the stall current of the motor
           // We don't know user's intentions so we can't just limit to safe current
-          requested_current =
-            std::clamp(requested_current, -motor_.MAX_CURRENT, motor_.MAX_CURRENT);
+          requested_current = std::clamp(requested_current, -motor_.MAX_CURRENT, motor_.MAX_CURRENT);
 
           // Generate desired current in QD frame, D = 0;
-          QuadDirectValues<float> desr_current{requested_current, 0};
+          QuadDirectValues<float> desr_current{requested_current, 0.f};
 
 
+          PhaseValues<float> ctrl_volts{0.f, 0.f, 0.f};
+          
           // Pump controllers
-          auto ff_volts = feedforward(desr_current);
-          // auto fb_volts = feedback(desr_current);
-          auto bemf_volts = back_emf_decoupler();
+          if(feedback_enable_) { ctrl_volts += feedforward(desr_current); }
+          if(feedback_enable_) { ctrl_volts += feedback(desr_current); }
+          if(back_emf_enable_) { ctrl_volts += back_emf_decoupler(); }
 
-          auto ctrl_volts = filter_phase_voltages(ff_volts + bemf_volts);
+          //Apply filter to these controllers 
+
+          auto filtered_ctrl_volts = filter_phase_voltages(ctrl_volts);
 
           if(anticog_volt_){
             ctrl_volts += get_cogging_voltage(shaft_angle_ - cogging_offset_, anticog_volt_map_);
@@ -376,8 +393,6 @@ public:
           const auto dr_volts = center_phase_voltages(ctrl_volts) + PhaseValues<float>{1.f, 1.f, 1.f};
           
           last_phase_volts_ = dr_volts;
-
-          // desr_voltage_.at(i_) = dr_volts;
 
           driver_.set_phase_voltages(dr_volts);
         }
@@ -393,13 +408,7 @@ private:
   MotorParameters motor_;
   BrushlessDriver & driver_;
   InlineCurrentSensorPackage & cs_;
-  SPIEncoder & position_sensor_;
-
-
-  /// \note: Filters
-  // Unused
-  // Butterworth2nd<float> pos_filter_;
-  // Butterworth2nd<float> vel_filter_;
+  AbsoluteEncoder & position_sensor_;
 
   PhaseValues<Butterworth2nd<float>> applited_voltage_filters_;
   PhaseValues<Butterworth2nd<float>> feedback_voltage_filters_;
@@ -445,6 +454,10 @@ private:
   PhaseValues<float> phase_currents_{0.f, 0.f, 0.f};
   QuadDirectValues<float> quaddirect_currents_{0.f, 0.f};
 
+  bool feedforward_enable_ = true;
+  bool feedback_enable_ = true;
+  bool back_emf_enable_ = true;
+
   /// \note: Feedback controller variables
   float Kp_;
   float Ki_;
@@ -461,7 +474,6 @@ private:
 
   PhaseValues<float> last_phase_volts_{0.f, 0.f, 0.f};
 
-
   ControllerMode ctrl_mode_ = ControllerMode::DISABLE;
 
   TeensyTimerTool::PeriodicTimer ctrl_timer_;
@@ -473,30 +485,12 @@ private:
 
   float MAX_VOLT_ = 3.f;
 
-  bool anticog_ = false;
+  bool anticog_enable_ = false;
   std::vector<float> & anticog_map_;
-  bool anticog_volt_ = false;
+  bool anticog_volt_enable_ = false;
   PhaseValues<std::vector<float>> & anticog_volt_map_;
 
   bool debug_print_ = true;
-
-  const size_t max_size = 1;
-
-  std::vector<float> time_ = std::vector<float>(max_size, 0.f);
-  std::vector<float> ref_current_ = std::vector<float>(max_size, 0.f);
-  std::vector<QuadDirectValues<float>> meas_current_ = std::vector<QuadDirectValues<float>>(
-    max_size, {0.f, 0.f});
-  std::vector<PhaseValues<float>> desr_voltage_ = std::vector<PhaseValues<float>>(
-    max_size, {0.f,
-      0.f, 0.f});
-  std::vector<float> vels_ = std::vector<float>(max_size, 0.f);
-  std::vector<float> shaft_angles_ = std::vector<float>(max_size, 0.f);
-  std::vector<float> vel_angles_ = std::vector<float>(max_size, 0.f);
-
-  size_t i_ = 0;
-  float start_time_;
-  int max_loops_ = 15;
-  int loops_ = 0;
 
   void debug_print(auto msg)
   {
@@ -552,11 +546,6 @@ private:
 
   void printer()
   {
-    // Serial.print(1000.f * target_);
-    // Serial.print("\t");
-    // Serial.print(1000.f * quaddirect_currents_.q * motor_.kT);
-    // Serial.print("\t");
-    // Serial.println(encoder_angle.get_full_angle());
     Serial.println(shaft_velocity_);
   }
 
