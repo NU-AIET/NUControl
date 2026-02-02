@@ -78,9 +78,13 @@ public:
 
     set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_current_, filter_cutoff_freq_hz_fb_);
 
-    last_vel_angle_ = 0.f;
+    update_sensors();
+
+    pos_filter_.reset(shaft_angle_);
+    vel_filter_.reset(shaft_angle_);
+    vel_filter_cutoff_.reset();
+
     shaft_velocity_ = 0.f;
-    loops_since_tick_ = -1;
 
     last_error_ = QuadDirectValues<float>{0.f, 0.f};
     last_command_ = QuadDirectValues<float>{0.f, 0.f};
@@ -116,6 +120,14 @@ public:
     feedback_ = fb_filter;
   }
 
+  void set_velocity_filter(DiscreteFilter<float, float> vel_filter) {
+    vel_filter_ = vel_filter;
+  }
+
+  void set_position_filter(DiscreteFilter<float, float> pos_filter) { 
+    pos_filter_ = pos_filter;
+  }
+
   void stop_print()
   {
     print_timer_.stop();
@@ -141,7 +153,7 @@ public:
     delay(1000);
 
     // Reset open loop angle and velocity 
-    open_loop_encoder_angle = 0.f;
+    open_loop_shaft_angle_ = 0.f;
     open_loop_shaft_velocity_ = 0.f;
 
     set_control_mode(ControllerMode::OPEN_LOOP_VELOCITY);
@@ -155,7 +167,7 @@ public:
     float enc_sum = 0.f;
     int steps = 0;
 
-    while(open_loop_encoder_angle < calibration_scan_distance_){
+    while(open_loop_shaft_angle_ < calibration_scan_distance_){
       update_sensors();
       enc_sum += encoder_angle.get_angle();
       steps++;
@@ -169,8 +181,6 @@ public:
 
     Serial.println("Moving done 1");
     Serial.flush();
-
-    
 
     if(encoder_angle.get_full_angle() > init_ang + 0.5f * calibration_scan_distance_){
       pos_sensor_dir_ = 1;
@@ -187,11 +197,11 @@ public:
 
 
     driver_.enable();
-    open_loop_encoder_angle = 0.f;
+    open_loop_shaft_angle_ = 0.f;
     open_loop_shaft_velocity_ = 0.f;
     target_ = -calibration_scan_speed_;
 
-    while(open_loop_encoder_angle > -calibration_scan_distance_){
+    while(open_loop_shaft_angle_ > -calibration_scan_distance_){
       update_sensors();
       enc_sum += encoder_angle.get_angle();
       steps++;
@@ -215,30 +225,19 @@ public:
     return ret;
   }
 
-  void set_e_angle_offset(float e_ang)
-  {
-    e_ang_offset_ = e_ang;
-  }
+  void set_e_angle_offset(float e_ang) { e_ang_offset_ = e_ang; }
 
-  float get_e_angle_offset() const
-  {
-    return e_ang_offset_;
-  }
+  float get_e_angle_offset() const { return e_ang_offset_; }
 
-  float get_shaft_angle() const
-  {
-    return encoder_angle.get_full_angle();
-  }
+  float get_shaft_angle() const { return shaft_angle_; }
 
-  float get_shaft_radians() const
-  {
-    return encoder_angle.get_angle();
-  }
+  float get_shaft_radians() const { return normalize_angle(shaft_angle_); }
 
-  float get_shaft_velocity() const
-  {
-    return shaft_velocity_;
-  }
+  float get_encoder_angle() const { return encoder_angle.get_full_angle(); }
+
+  float get_encoder_radians() const { return encoder_angle.get_angle(); }
+
+  float get_shaft_velocity() const { return shaft_velocity_; }
 
   void enable_anticog(const std::vector<float> & map)
   {
@@ -263,22 +262,15 @@ public:
     anticog_volt_map_ = default_anticog_volt_map;
   }
 
-  void set_feedforward_state(bool state){
-    feedforward_enable_ = state;
-  }
+  void set_feedforward_state(bool state){ feedforward_enable_ = state; }
 
-  void set_feedback_state(bool state){
-    feedback_enable_ = state;
-  }
+  void set_feedback_state(bool state){ feedback_enable_ = state; }
 
-  void set_back_emf_comp_state(bool state){
-    back_emf_enable_ = state;
-  }
+  void set_back_emf_comp_state(bool state){ back_emf_enable_ = state; }
 
   void set_cogging_offset()
   {
     cogging_offset_ = position_sensor_.read();
-
   }
 
   PhaseValues<float> get_last_phasevolts() const
@@ -288,39 +280,14 @@ public:
 
   void update_sensors()
   {
-    // This is only tripped on the first loop since control has started.
-    // We need to do some cleanup to make sure our filters won't delay new inputs
-    if (loops_since_tick_ == -1) {
-      encoder_angle.update_angle(position_sensor_.read());
-      shaft_angle_ = pos_sensor_dir_ * encoder_angle.get_full_angle();
-      last_vel_angle_ = shaft_angle_;
-      // vel_filter_.reset();
-      loops_since_tick_++;
-
-    } else {
-
-      // Position first
-      encoder_angle.update_angle(position_sensor_.read());
-      shaft_angle_ = pos_sensor_dir_ * encoder_angle.get_full_angle();
-
-      if (loops_since_tick_ == 2000) {
-        float vel_hat = (shaft_angle_ - last_vel_angle_) /
-          (static_cast<float>(2000) * control_period_s_ );
-        last_vel_angle_ = shaft_angle_;
-        // shaft_velocity_ = vel_filter_.update(vel_hat);
-        shaft_velocity_ = vel_hat;
-        loops_since_tick_ = 0;
-      }
-    }
-
+    encoder_angle.update_angle(position_sensor_.read());
+    shaft_angle_ = (pos_sensor_dir_ * encoder_angle.get_full_angle());
+    shaft_velocity_ = vel_filter_cutoff_.update(vel_filter_.update(shaft_angle_));
 
     electrical_angle_ = get_eangle(shaft_angle_);
 
-    loops_since_tick_++;
-
     phase_currents_ = cs_.get_phase_currents(true);
-    quaddirect_currents_ =
-      phases_to_quaddirect<float>(phase_currents_, electrical_angle_);
+    quaddirect_currents_ = phases_to_quaddirect<float>(phase_currents_, electrical_angle_);
   }
 
   void set_target(float target)
@@ -334,7 +301,7 @@ public:
       case ControllerMode::DISABLE:
         return;
       case ControllerMode::OPEN_LOOP_VELOCITY:
-        open_loop_encoder_angle += (target_ * control_period_s_);
+        open_loop_shaft_angle_ += (target_ * control_period_s_);
         open_loop_shaft_velocity_ = target_;
         {
           // In this case, the target is a desired shaft velocity
@@ -345,7 +312,7 @@ public:
           auto phase_volts =
             quaddirect_to_phases<float>(
             {motor_.phase_R * motor_.SAFE_CURRENT + back_emf, 0.f}, get_eangle(
-              open_loop_encoder_angle));
+              open_loop_shaft_angle_));
           auto cntr_volts = center_phase_voltages(phase_volts);
           driver_.set_phase_voltages(cntr_volts);
         }
@@ -357,15 +324,10 @@ public:
           // Convert requested torque into a current request
          
 
-          if (anticog_enable_) { target_ += get_cogging_torque(mechanical_angle_ - cogging_offset_, anticog_map_); }
+          if (anticog_enable_) { target_ += get_cogging_torque(shaft_angle_ - cogging_offset_, anticog_map_); }
 
 
           float requested_current = target_ / motor_.kT;
-
-          if (anticog_) {
-            requested_current +=
-              get_cogging_torque(shaft_angle_ - cogging_offset_, anticog_map_) / motor_.kT;
-          }
 
           // Let's limit to the stall current of the motor
           // We don't know user's intentions so we can't just limit to safe current
@@ -374,11 +336,10 @@ public:
           // Generate desired current in QD frame, D = 0;
           QuadDirectValues<float> desr_current{requested_current, 0.f};
 
-
           PhaseValues<float> ctrl_volts{0.f, 0.f, 0.f};
           
           // Pump controllers
-          if(feedback_enable_) { ctrl_volts += feedforward(desr_current); }
+          if(feedforward_enable_) { ctrl_volts += feedforward(desr_current); }
           if(feedback_enable_) { ctrl_volts += feedback(desr_current); }
           if(back_emf_enable_) { ctrl_volts += back_emf_decoupler(); }
 
@@ -386,7 +347,7 @@ public:
 
           auto filtered_ctrl_volts = filter_phase_voltages(ctrl_volts);
 
-          if(anticog_volt_){
+          if(anticog_volt_enable_){
             ctrl_volts += get_cogging_voltage(shaft_angle_ - cogging_offset_, anticog_volt_map_);
           }
 
@@ -440,6 +401,10 @@ private:
   float encoder_offset_ = 0.f;
   float electrical_angle_ = 0.f;
 
+  DiscreteFilter<float, float> pos_filter_{{1.f}, {}};
+  DiscreteFilter<float, float> vel_filter_{{10000.f, -10000.f}, {}};
+  Butterworth2nd<float> vel_filter_cutoff_ = Butterworth2nd<float>(100.f, 10000.f);
+
   float e_ang_offset_ = 0.f; //rad = How much to subtract from mech ang to align w/ electical angle
 
   float cogging_offset_ = 0.f;
@@ -447,7 +412,7 @@ private:
   float target_; // Units depend on control mode, either rad /s or Nm
 
   /// \note: Open loop variables
-  float open_loop_encoder_angle = 0.f;
+  float open_loop_shaft_angle_ = 0.f;
   float open_loop_shaft_velocity_ = 0.f;
 
 
