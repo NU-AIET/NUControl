@@ -32,7 +32,7 @@ SPIEncoder Encoder1{EncoderReadCmd, SPI, 10};
 SPIEncoder Encoder2{EncoderReadCmd, SPI1, 0};
 SPIEncoder Encoder3{EncoderReadCmd, SPI2, 36};
 
-BrushlessDriver GateDriver1{{5, 4, 3}, 2, PWM_FREQ, PWM_RES, DRIVER_VOLTAGE};
+BrushlessDriver GateDriver1{{3, 4, 5}, 2, PWM_FREQ, PWM_RES, DRIVER_VOLTAGE};
 BrushlessDriver GateDriver2{{9, 8, 7}, 6, PWM_FREQ, PWM_RES, DRIVER_VOLTAGE};
 BrushlessDriver GateDriver3{{33, 29, 39}, 38, PWM_FREQ, PWM_RES, DRIVER_VOLTAGE};
 
@@ -43,7 +43,7 @@ BrushlessController controller_2{U2535, GateDriver2, Current_Sensors2, Encoder3}
 BrushlessController controller_3{U2535, GateDriver3, Current_Sensors3, Encoder1}; // SPLAY
 // BrushlessController controller_{EC45_Flat, GateDriver, Current_Sensors, Encoder};
 
-CoggingMapper<100> mapper_(controller_2);
+// CoggingMapper<100> mapper_(controller_2);
 
 
 // const PhaseValues<std::array<float, 100>>exo_splay_volt_map
@@ -111,24 +111,24 @@ float kp = 0.1f;
 
 void update(){
   controller_1.update_sensors();
-  // controller_1.update_control();
+  controller_1.update_control();
   // controller_2.update_sensors();
   // controller_2.update_control();
   // controller_3.update_sensors();
   // controller_3.update_control();
-  auto torque = kp * normalize_angle(targets_[idx] - controller_1.get_shaft_angle());
-  torque = std::clamp(torque, -0.3f, 0.3f);
+  // auto torque = kp * normalize_angle(targets_[idx] - controller_1.get_shaft_angle());
+  // torque = std::clamp(torque, -0.3f, 0.3f);
 
-  controller_1.set_target(torque);
-  controller_1.update_control();
-  if(cntr >= 10000){
-    idx++;
-    cntr = 0;
-    if(idx == 10) {
-      idx = 0;
-    }
-  }
-  cntr++;
+  // controller_1.set_target(torque);
+  // controller_1.update_control();
+  // if(cntr >= 10000){
+  //   idx++;
+  //   cntr = 0;
+  //   if(idx == 10) {
+  //     idx = 0;
+  //   }
+  // }
+  // cntr++;
 
 }
 
@@ -215,7 +215,7 @@ void setup()
   controller_1.set_position_filter({{0.25f, 0.25f, 0.25f, 0.25f}, {}});
   controller_1.set_velocity_filter(vel_filter_200_);
   controller_1.set_target(0.03f);
-  controller_1.set_feedback_state(false);
+  controller_1.set_feedback_state(true);
   controller_1.set_back_emf_comp_state(false);
   // controller_1.enable_anticog(std::function<PhaseValues<float>(float)>(dist_cog));
 
