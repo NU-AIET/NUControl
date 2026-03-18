@@ -57,7 +57,6 @@ public:
     uint16_t raw = SPI_.transfer16(0x000);
     digitalWriteFast(cs_, HIGH);
     return ((raw >> 0) << 0) & (max_read_ - 1);
-
   }
 
 private:

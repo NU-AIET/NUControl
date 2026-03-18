@@ -26,10 +26,6 @@ struct BrushlessCalibration
   const float eangle_offset{0};
 
   const float cogging_offset = 0.f;
-
-  // constexpr std::array<float, steps_> anticog_torque{};
-  // constexpr PhaseValues<std::array<float, steps_>> anticog_volts{}; 
-
 };
 
 class BrushlessController
@@ -430,8 +426,8 @@ private:
 
   float filter_cutoff_freq_hz_fb_ = 500.f;
 
-  float calibration_scan_speed_ = 0.25 * PI;
-  float calibration_scan_distance_ = PI;
+  float calibration_scan_speed_ = 0.25f * PI;
+  float calibration_scan_distance_ = 0.5f * PI;
   int calibration_dir_ = 1;
 
 
