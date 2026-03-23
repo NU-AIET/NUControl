@@ -14,3 +14,4 @@ python/*
 /python/*
 data/*
 /data/*
+*.csv
