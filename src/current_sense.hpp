@@ -94,7 +94,10 @@ private:
 
     // Uh oh!
     if (fabs(offset_ - offset) > 1e-2) {
+      Serial.print("Sensor Failed to Init. Current Read: ");
+      Serial.println(offset);
       return false;
+
     }
     return true;
 

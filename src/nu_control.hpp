@@ -12,6 +12,7 @@
 #include "spi_encoder.hpp"
 #include "transformations.hpp"
 #include "cogging_mapper.hpp"
+#include "anticog_helpers.hpp"
 #include "userConfig.h"
 #include "vel_filters.hpp"
 
