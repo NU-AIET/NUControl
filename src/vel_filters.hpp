@@ -1,8 +1,56 @@
+/**
+ * @file vel_filters.hpp
+ * @brief Pre-designed velocity estimation FIR filter coefficients and instances.
+ *
+ * @details Provides a 200-tap FIR differentiating filter (`vel_200_coeffs_`)
+ * designed to estimate shaft velocity from a stream of absolute encoder angle
+ * samples at 10 kHz. The filter approximates a first-difference differentiator
+ * with a low-pass characteristic to reject high-frequency encoder quantisation noise.
+ *
+ * ## Filter characteristics (vel_200_coeffs_)
+ * - **Type**: Linear-phase FIR differentiator
+ * - **Number of taps**: 200 (order 199)
+ * - **Sampling rate**: 10 000 Hz (100 µs control period)
+ * - **Passband**: DC to approximately 100 Hz (estimated from coefficient magnitude)
+ * - **Output units**: If input is in radians, output is in radians/sample;
+ *   multiply by `f_s = 10 000` to get rad/s.
+ *
+ * ## Usage
+ * `vel_filter_200_` is a global `DiscreteFilter<float,float>` instance. It is
+ * assigned to `BrushlessController` via `set_velocity_filter()` in `example.cpp`:
+ * @code
+ * controller_1.set_velocity_filter(vel_filter_200_);
+ * @endcode
+ *
+ * @warning `vel_filter_200_` is a **global shared instance** with 200-tap state.
+ * If more than one `BrushlessController` uses it, the filter state will be
+ * corrupted since both controllers write to the same shift register.
+ *
+ * @todo Declare `vel_filter_200_` as a `const` template or a factory function
+ *       that returns a freshly constructed `DiscreteFilter` each time, so each
+ *       controller gets an independent state.
+ */
+
 #ifndef VEL_FILTERS_HPP
 #define VEL_FILTERS_HPP
 #include "discrete_filter.hpp"
 #include <array>
 
+/**
+ * @brief 200-tap FIR differentiating filter coefficients for velocity estimation.
+ *
+ * @details Coefficients designed offline (e.g., via MATLAB `fir1` or `firpm`)
+ * for a 10 kHz sampling rate. The filter combines differentiation (finite
+ * difference) with low-pass smoothing to estimate angular velocity from
+ * absolute encoder position samples.
+ *
+ * The coefficients are stored as a `std::vector<float>` to be compatible with
+ * the `DiscreteFilter` constructor.
+ *
+ * @note The asymmetric shape (positive peak near the beginning, gradual sign
+ *       reversal toward the end) is characteristic of a causal FIR differentiator
+ *       with a non-symmetric window. Group delay ≈ 100 samples ≈ 10 ms.
+ */
 const std::vector<float> vel_200_coeffs_ = {28.9734326,27.52295677,26.10537177,24.72036642,23.36762954
                                                 ,22.04684994,20.75771642,19.49991782,18.27314293,17.07708058
                                                 ,15.91141957,14.77584873,13.67005687,12.5937328,11.54656533
@@ -44,7 +92,17 @@ const std::vector<float> vel_200_coeffs_ = {28.9734326,27.52295677,26.10537177,2
                                                 ,-6.20211248,-6.9906714,-7.80546479,-8.64680384,-9.51499974
                                                 ,-10.41036366,-11.33320681,-12.28384036,-13.2625755,-14.26972342};
 
+/**
+ * @brief Pre-instantiated 200-tap FIR velocity estimator (pure FIR, no IIR feedback).
+ *
+ * @details Constructed from `vel_200_coeffs_` with an empty denominator vector
+ * (pure FIR filter). Used in `BrushlessController` after `set_velocity_filter()`.
+ *
+ * @warning **Global shared state.** Do not assign to more than one controller.
+ *          Each controller must have its own independent `DiscreteFilter` instance.
+ *          See `@todo` in file header.
+ */
 DiscreteFilter<float, float> vel_filter_200_{vel_200_coeffs_, {}};
 
 
-#endif
+#endif // VEL_FILTERS_HPP
