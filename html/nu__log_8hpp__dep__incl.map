@@ -1,0 +1,18 @@
+<map id="src/nu_log.hpp" name="src/nu_log.hpp">
+<area shape="rect" id="Node000001" title="ISR&#45;safe, non&#45;blocking structured logger for NUControl." alt="" coords="207,5,323,31"/>
+<area shape="rect" id="Node000002" href="$errors_8hpp.html" title="Error and warning codes with associated handler callbacks." alt="" coords="209,79,320,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="267,44,267,79,262,79,262,44"/>
+<area shape="rect" id="Node000003" href="$current__sense_8hpp.html" title="Inline current sensing for three&#45;phase motor control." alt="" coords="123,152,287,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="248,116,216,154,212,150,244,113"/>
+<area shape="rect" id="Node000006" href="$nu__control_8hpp.html" title="Monolithic include header for the NUControl FOC library." alt="" coords="178,372,319,397"/>
+<area shape="poly" id="edge9_Node000002_Node000006" title=" " alt="" coords="283,114,301,151,302,165,301,178,295,252,279,325,258,373,253,371,274,323,290,251,295,177,297,165,295,153,279,116"/>
+<area shape="rect" id="Node000004" href="$brushless__controller_8hpp.html" title="Field&#45;Oriented Control (FOC) brushless motor controller." alt="" coords="34,225,237,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="186,189,148,227,145,223,182,185"/>
+<area shape="poly" id="edge8_Node000003_Node000006" title=" " alt="" coords="228,186,241,204,251,224,260,266,261,308,254,372,248,372,256,308,254,267,246,226,237,207,224,189"/>
+<area shape="rect" id="Node000005" href="$cogging__mapper_8hpp.html" title="Automated cogging&#45;torque measurement sweep for AnticoggingCompensator." alt="" coords="5,299,185,324"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="124,264,104,300,99,297,120,262"/>
+<area shape="poly" id="edge7_Node000004_Node000006" title=" " alt="" coords="161,258,199,297,226,337,245,370,240,373,221,339,195,300,157,262"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="133,327,225,369,222,374,131,332"/>
+<area shape="rect" id="Node000007" href="$example_8cpp.html" title="Exoskeleton ankle/knee joint test — single motor (U2523, GateDriver2)." alt="" coords="184,445,313,471"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="251,411,251,445,246,445,246,411"/>
+</map>

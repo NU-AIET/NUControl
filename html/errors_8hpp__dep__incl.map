@@ -1,0 +1,16 @@
+<map id="src/errors.hpp" name="src/errors.hpp">
+<area shape="rect" id="Node000001" title="Error and warning codes with associated handler callbacks." alt="" coords="209,5,320,31"/>
+<area shape="rect" id="Node000002" href="$current__sense_8hpp.html" title="Inline current sensing for three&#45;phase motor control." alt="" coords="123,79,287,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="248,43,216,80,212,77,244,40"/>
+<area shape="rect" id="Node000005" href="$nu__control_8hpp.html" title="Monolithic include header for the NUControl FOC library." alt="" coords="178,299,319,324"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="283,41,301,78,302,91,301,104,295,179,279,252,258,300,253,298,274,250,290,178,295,104,297,91,295,79,279,43"/>
+<area shape="rect" id="Node000003" href="$brushless__controller_8hpp.html" title="Field&#45;Oriented Control (FOC) brushless motor controller." alt="" coords="34,152,237,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="186,116,148,154,145,150,182,112"/>
+<area shape="poly" id="edge7_Node000002_Node000005" title=" " alt="" coords="228,113,241,130,251,151,260,193,261,235,254,299,248,298,256,235,254,194,246,153,237,133,224,116"/>
+<area shape="rect" id="Node000004" href="$cogging__mapper_8hpp.html" title="Automated cogging&#45;torque measurement sweep for AnticoggingCompensator." alt="" coords="5,225,185,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="124,191,104,227,99,224,120,188"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="161,185,199,224,226,263,245,297,240,300,221,266,195,227,157,188"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="133,254,225,296,222,301,131,259"/>
+<area shape="rect" id="Node000006" href="$example_8cpp.html" title="Exoskeleton ankle/knee joint test — single motor (U2523, GateDriver2)." alt="" coords="184,372,313,397"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="251,338,251,372,246,372,246,338"/>
+</map>

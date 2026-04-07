@@ -1,0 +1,7 @@
+<map id="src/thermal_model.hpp" name="src/thermal_model.hpp">
+<area shape="rect" id="Node000001" title="Temperature sensor abstraction and two&#45;node winding thermal model for motor current derating." alt="" coords="11,5,183,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,89,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,33,65,69,61,66,86,29"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="113,79,181,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="107,29,133,66,129,69,103,33"/>
+</map>

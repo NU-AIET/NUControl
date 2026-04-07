@@ -1,0 +1,7 @@
+<map id="src/spi_encoder.hpp" name="src/spi_encoder.hpp">
+<area shape="rect" id="Node000001" title="SPI absolute encoder driver for AMS AS5047P / AS5147P with DMA async reads and parity / error&#45;flag va..." alt="" coords="5,5,156,31"/>
+<area shape="rect" id="Node000002" href="$nu__control_8hpp.html" title="Monolithic include header for the NUControl FOC library." alt="" coords="10,79,151,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,44,83,79,78,79,78,44"/>
+<area shape="rect" id="Node000003" href="$example_8cpp.html" title="Exoskeleton ankle/knee joint test — single motor (U2523, GateDriver2)." alt="" coords="16,152,145,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="83,118,83,152,78,152,78,118"/>
+</map>

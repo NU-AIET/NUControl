@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['c_0',['c',['../structPhaseValues.html#a713a121b7259aad89e1b71f6a2301a4b',1,'PhaseValues']]],
+  ['c1_5fzero_1',['c1_zero',['../example_8cpp.html#a464f229166cd1ec43a7840d9b31af2ec',1,'example.cpp']]],
+  ['c_5fth_5fcase_2',['C_th_case',['../structMotorParameters.html#ac1fe9893ab1f31f970860f3d4e3b43cf',1,'MotorParameters']]],
+  ['c_5fth_5fwinding_3',['C_th_winding',['../structMotorParameters.html#acb99d57618f7694aade3e1d90b04ffd4',1,'MotorParameters']]],
+  ['channel_4',['channel',['../structpwm__hal_1_1FlexPWMPin.html#a8886700d8ab7359a96cce812a2022ae8',1,'pwm_hal::FlexPWMPin']]],
+  ['cntr_5',['cntr',['../example_8cpp.html#a603f309ce07a641687c19cb3c963923f',1,'example.cpp']]],
+  ['cogging_5foffset_6',['cogging_offset',['../structBrushlessCalibration.html#af98d4d10e5c1230f2d52f5179da704a3',1,'BrushlessCalibration']]],
+  ['controller_5f1_7',['controller_1',['../example_8cpp.html#a8655684ba6e8e39a75c9716e84885952',1,'example.cpp']]],
+  ['cs_5fphase_5fdirs_8',['cs_phase_dirs',['../structBrushlessCalibration.html#add15b492a0a15e08ba5b7a049bed6d48',1,'BrushlessCalibration']]],
+  ['cs_5fphase_5fidx_9',['cs_phase_idx',['../structBrushlessCalibration.html#abd4eb7b7eabf2289412e3c95fecd15be',1,'BrushlessCalibration']]],
+  ['curr_5fgain_10',['CURR_GAIN',['../example_8cpp.html#aa480c259ea22e0ac6eb0c3790b8c724c',1,'example.cpp']]],
+  ['current_5fphase_5f0_11',['Current_Phase_0',['../example_8cpp.html#af002441756b4626d60619b4cc4095682',1,'example.cpp']]],
+  ['current_5fphase_5f1_12',['Current_Phase_1',['../example_8cpp.html#accea5c7c0acbeb9694aea8ba784e89ae',1,'example.cpp']]],
+  ['current_5fphase_5f2_13',['Current_Phase_2',['../example_8cpp.html#a46991036c6502ecb602bea47a1f19347',1,'example.cpp']]],
+  ['current_5fphase_5f3_14',['Current_Phase_3',['../example_8cpp.html#a4748b35165c084aa66c9b8acd710e08c',1,'example.cpp']]],
+  ['current_5fphase_5f4_15',['Current_Phase_4',['../example_8cpp.html#aff278e9d5b843e49af75cc88e35c6768',1,'example.cpp']]],
+  ['current_5fphase_5f5_16',['Current_Phase_5',['../example_8cpp.html#a2324918d3ade576ca71bb724c417a314',1,'example.cpp']]],
+  ['current_5fphase_5f6_17',['Current_Phase_6',['../example_8cpp.html#ab75721bc778cf0c67cc18637fa3b6cf1',1,'example.cpp']]],
+  ['current_5fphase_5f7_18',['Current_Phase_7',['../example_8cpp.html#acbed653c4634443247f0b8ec1cecb390',1,'example.cpp']]],
+  ['current_5fphase_5f8_19',['Current_Phase_8',['../example_8cpp.html#a58661b7b86bff04952a0088b035154b9',1,'example.cpp']]],
+  ['current_5fphase_5f9_20',['Current_Phase_9',['../example_8cpp.html#ad2b656b6c3f363b6c3afefb85cb31376',1,'example.cpp']]],
+  ['current_5fsensors1_21',['Current_Sensors1',['../example_8cpp.html#ae807f368d3e14016803f4dbec7dc53a4',1,'example.cpp']]],
+  ['current_5fsensors2_22',['Current_Sensors2',['../example_8cpp.html#ae1d119973a7b0c07f91a6d82c2ccd064',1,'example.cpp']]],
+  ['current_5fsensors3_23',['Current_Sensors3',['../example_8cpp.html#a7990aa6ac71ab6de6dec268a6cea93c9',1,'example.cpp']]]
+];

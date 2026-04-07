@@ -1,0 +1,35 @@
+\chapter{README}
+\hypertarget{md_README}{}\label{md_README}\index{README@{README}}
+
+
+NU Control is intended to serve as a multi-\/functional, high performance, motor control library for the Center for Robotics and Biosystems at Northwestern University. The library is current written for a Teensy 4.\+x microcontroller.\hypertarget{md_README_autotoc_md0}{}\doxysubsection{\texorpdfstring{Capabilities}{Capabilities}}\label{md_README_autotoc_md0}
+
+\begin{DoxyItemize}
+\item Brushless Direct Current Motors
+\begin{DoxyItemize}
+\item Example Motors\+:
+\begin{DoxyItemize}
+\item Maxon EC45 Flat
+\item Mosrac U2535 (In progress)
+\end{DoxyItemize}
+\end{DoxyItemize}
+\end{DoxyItemize}\hypertarget{md_README_autotoc_md1}{}\doxysubsection{\texorpdfstring{Brushless Direct Current Motors}{Brushless Direct Current Motors}}\label{md_README_autotoc_md1}
+\hypertarget{md_README_autotoc_md2}{}\doxysubsubsection{\texorpdfstring{Field Oriented Control (\+Torque)}{Field Oriented Control (Torque)}}\label{md_README_autotoc_md2}
+
+\begin{DoxyItemize}
+\item Field Oriented Control (FOC) is a technique used in brushless motor control that regulates the torque production of a motor. Its main benefits are improved efficiency, precise torque control, and smoother motor operation, especially at low speeds.
+\item The full control scheme is shown below. Note that sections (feedforward, feedback, backemf decoupler) can be individually enabled or disabled as desired. High performance control requires information about the motor. The key information required is the individual phase resitance and inductance as well as the motor constants Kt and Kv.
+\item Feedforward control is achieved through converting a desired torque into a desired current in the Q-\/axis using the motor torque coefficent Kt. This Q-\/\+Axis current is then conerted to the ABC Phase Frame and passed through a discrete filter which predicts the necessary voltage to achieve the desired current. This discrete filter is the inverse of the impedance filter composed of the motor\textquotesingle{}s phase resistance and phase inductance. Therefore, good estimates of both values are critical to performance.
+\item Feedback control is primarily implemented for distrubrance rejection. It is not recommended to use this controller for the primary driving controller. A desired Q-\/axis current is compared against the measured Phase Currents which are transformed into the DQ0 frame. The D-\/axis current is regulated to 0 while the Q-\/axis current is regulated to the desired value.
+\item Back EMF is voltage generated across the motor phases as the motor spins. Necessarily, this changes the current flow across the phases, causing the Q-\/axis current target to not be achieved. This controller takes the velocity of the motor rotor into account and attempts to remove the back EMF from the phases.
+\end{DoxyItemize}
+
+\hypertarget{md_README_autotoc_md3}{}\doxysubsubsection{\texorpdfstring{Open Loop Velocity Control}{Open Loop Velocity Control}}\label{md_README_autotoc_md3}
+
+\begin{DoxyItemize}
+\item By stepping through an electrical cycle at a desired rate, a brushless motor can be spun matching that rate.
+\end{DoxyItemize}\hypertarget{md_README_autotoc_md4}{}\doxysubsection{\texorpdfstring{Brushed Direct Current Motors (\+Coming Soon)}{Brushed Direct Current Motors (Coming Soon)}}\label{md_README_autotoc_md4}
+
+\begin{DoxyItemize}
+\item Brushed motors do not require software commutation due to the presence of physical brushes. This greatly simplifies control at the cost of increased torque ripple. 
+\end{DoxyItemize}

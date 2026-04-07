@@ -133,44 +133,69 @@ inline uint8_t arduino_pin_to_adc2_channel(uint8_t arduino_pin)
 // ---------------------------------------------------------------------------
 
 /**
+ * @brief Resolves the XBARA1 input signal index for a FlexPWM trigger output.
+ *
+ * @details Maps a FlexPWMPin (module pointer + submodule index) to the
+ * corresponding `XBARA1_IN_FLEXPWMx_PWMy_OUT_TRIG0` constant. The constant
+ * names use the same submodule numbering as the `submodule` field in
+ * `FlexPWMPin` (e.g., submodule 2 → `PWM2`). Submodule 0 is not routed
+ * through XBARA1 on iMXRT1062 and returns 255.
+ *
+ * @param pin FlexPWMPin from `pwm_hal::get_flexpwm_pin()`.
+ * @returns XBARA1_IN constant, or 255 if the module/submodule has no XBARA1
+ *          trigger output (submodule 0 or unrecognised module).
+ */
+inline uint8_t flexpwm_pin_to_xbara1_in(const pwm_hal::FlexPWMPin & pin)
+{
+    if (pin.module == &IMXRT_FLEXPWM1) {
+        switch (pin.submodule) {
+            case 1: return XBARA1_IN_FLEXPWM1_PWM1_OUT_TRIG0;
+            case 2: return XBARA1_IN_FLEXPWM1_PWM2_OUT_TRIG0;
+            case 3: return XBARA1_IN_FLEXPWM1_PWM3_OUT_TRIG0;
+            default: return 255;
+        }
+    }
+    if (pin.module == &IMXRT_FLEXPWM2) {
+        switch (pin.submodule) {
+            case 1: return XBARA1_IN_FLEXPWM2_PWM1_OUT_TRIG0;
+            case 2: return XBARA1_IN_FLEXPWM2_PWM2_OUT_TRIG0;
+            case 3: return XBARA1_IN_FLEXPWM2_PWM3_OUT_TRIG0;
+            default: return 255;
+        }
+    }
+    if (pin.module == &IMXRT_FLEXPWM3) {
+        switch (pin.submodule) {
+            case 1: return XBARA1_IN_FLEXPWM3_PWM1_OUT_TRIG0;
+            case 2: return XBARA1_IN_FLEXPWM3_PWM2_OUT_TRIG0;
+            case 3: return XBARA1_IN_FLEXPWM3_PWM3_OUT_TRIG0;
+            default: return 255;
+        }
+    }
+    if (pin.module == &IMXRT_FLEXPWM4) {
+        switch (pin.submodule) {
+            case 1: return XBARA1_IN_FLEXPWM4_PWM1_OUT_TRIG0;
+            case 2: return XBARA1_IN_FLEXPWM4_PWM2_OUT_TRIG0;
+            case 3: return XBARA1_IN_FLEXPWM4_PWM3_OUT_TRIG0;
+            default: return 255;
+        }
+    }
+    return 255;
+}
+
+/**
  * @brief Routes a FlexPWM submodule output trigger to ADC1 ETC trigger 0 via XBAR1.
  *
- * @details Enables the XBAR1 clock (`CCM_CCGR2`) and calls `xbar_connect()` to
- * connect the FlexPWM trigger output to the ADC_ETC trigger-0 input for ADC1.
- *
- * The XBARA1 routing used:
- * @code
- * XBARA1_IN_FLEXPWM2_PWM2_OUT_TRIG0  →  XBARA1_OUT_ADC1_ETC_TRIG00
- * @endcode
- *
- * This function currently hard-codes the trigger source to FLEXPWM2 SM[2]
- * (pin 9 on GateDriver2). A future improvement would dynamically select the
- * XBARA1 input based on the `trigger_source` argument.
- *
  * @param trigger_source FlexPWMPin from `BrushlessDriver::get_trigger_source()`.
- *                       Currently only FLEXPWM2 SM[2] is mapped; other
- *                       submodules will compile but may not route correctly.
- * @returns `true` on success, `false` if `trigger_source.module == nullptr`.
- *
- * @todo Implement a full XBARA1_IN lookup table keyed on (module, submodule)
- *       to support GateDriver1 (pins 3,4,5) and GateDriver3 (pins 29,33,39).
- *
- * @todo Verify XBARA1_IN_FLEXPWM2_PWM2_OUT_TRIG0 and XBARA1_OUT_ADC1_ETC_TRIG00
- *       constant names against the Teensyduino version installed. These constants
- *       are defined in `<imxrt.h>` and may be named differently in older releases.
+ * @returns `true` on success, `false` if the module/submodule has no XBARA1 output.
  */
 inline bool connect_flexpwm_trigger_to_adc1(const pwm_hal::FlexPWMPin & trigger_source)
 {
     if (trigger_source.module == nullptr) { return false; }
+    const uint8_t xbar_in = flexpwm_pin_to_xbara1_in(trigger_source);
+    if (xbar_in == 255u) { return false; }
 
-    // Enable XBAR1 peripheral clock before any XBAR register access
     CCM_CCGR2 |= CCM_CCGR2_XBAR1(CCM_CCGR_ON);
-
-    // Route FlexPWM2 SM[2] output trigger → ADC_ETC trigger 0 for ADC1.
-    // xbar_connect() writes the XBARA1_SEL register for this output.
-    // Constant names verified against Teensyduino 1.58 imxrt.h.
-    xbar_connect(XBARA1_IN_FLEXPWM2_PWM2_OUT_TRIG0, XBARA1_OUT_ADC_ETC_TRIG00);
-
+    xbar_connect(xbar_in, XBARA1_OUT_ADC_ETC_TRIG00);
     return true;
 }
 
@@ -179,47 +204,28 @@ inline bool connect_flexpwm_trigger_to_adc1(const pwm_hal::FlexPWMPin & trigger_
  *        index via XBAR1.
  *
  * @details Routes the same FlexPWM trigger edge to `ADC1_ETC_TRIG0{trig_idx}`,
- * allowing up to three sensors on ADC1 to be triggered simultaneously (sequentially
- * in hardware) by a single PWM counter-TOP event. Each sensor uses its own
- * ADC_ETC trigger index (0, 1, or 2), which controls an independent ADC1 channel
- * conversion and DMA transfer.
- *
- * | `trig_idx` | XBAR output              |
- * |-----------|--------------------------|
- * | 0         | `XBARA1_OUT_ADC1_ETC_TRIG00` |
- * | 1         | `XBARA1_OUT_ADC1_ETC_TRIG01` |
- * | 2         | `XBARA1_OUT_ADC1_ETC_TRIG02` |
+ * allowing up to three sensors on ADC1 to be triggered by a single PWM
+ * counter-TOP event. Each sensor uses its own ADC_ETC trigger index (0, 1, or 2).
  *
  * @param trigger_source FlexPWMPin from `BrushlessDriver::get_trigger_source()`.
- * @param trig_idx       ADC_ETC trigger index [0, 2]. Matches the sensor position
- *                       within the `InlineCurrentSensorPackage` (sensor 0 → TRIG0,
- *                       sensor 1 → TRIG1, sensor 2 → TRIG2).
- * @returns `true` on success, `false` if `trigger_source.module == nullptr` or
- *          `trig_idx > 2`.
- *
- * @todo Verify XBARA1_OUT_ADC1_ETC_TRIG01 and XBARA1_OUT_ADC1_ETC_TRIG02 constant
- *       names against the installed Teensyduino version. They may differ from the
- *       names used here. Check `<imxrt.h>` or `<xbar.h>`.
+ * @param trig_idx       ADC_ETC trigger index [0, 2].
+ * @returns `true` on success, `false` if module/submodule has no XBARA1 output
+ *          or `trig_idx > 2`.
  */
 inline bool connect_flexpwm_trigger_to_adc1_trig(
     const pwm_hal::FlexPWMPin & trigger_source, uint8_t trig_idx)
 {
     if (trigger_source.module == nullptr) { return false; }
+    const uint8_t xbar_in = flexpwm_pin_to_xbara1_in(trigger_source);
+    if (xbar_in == 255u) { return false; }
 
     CCM_CCGR2 |= CCM_CCGR2_XBAR1(CCM_CCGR_ON);
 
     switch (trig_idx) {
-        case 0:
-            xbar_connect(XBARA1_IN_FLEXPWM2_PWM2_OUT_TRIG0, XBARA1_OUT_ADC_ETC_TRIG00);
-            break;
-        case 1:
-            xbar_connect(XBARA1_IN_FLEXPWM2_PWM2_OUT_TRIG0, XBARA1_OUT_ADC_ETC_TRIG01);
-            break;
-        case 2:
-            xbar_connect(XBARA1_IN_FLEXPWM2_PWM2_OUT_TRIG0, XBARA1_OUT_ADC_ETC_TRIG02);
-            break;
-        default:
-            return false;
+        case 0: xbar_connect(xbar_in, XBARA1_OUT_ADC_ETC_TRIG00); break;
+        case 1: xbar_connect(xbar_in, XBARA1_OUT_ADC_ETC_TRIG01); break;
+        case 2: xbar_connect(xbar_in, XBARA1_OUT_ADC_ETC_TRIG02); break;
+        default: return false;
     }
     return true;
 }
@@ -227,22 +233,18 @@ inline bool connect_flexpwm_trigger_to_adc1_trig(
 /**
  * @brief Routes a FlexPWM submodule output trigger to ADC2 via XBAR1 and ADC_ETC.
  *
- * @details Mirrors `connect_flexpwm_trigger_to_adc1()` for ADC2. Both functions
- * can be called with the same `trigger_source`, causing a single FlexPWM pulse
- * to simultaneously trigger both ADC1 and ADC2 conversions.
- *
  * @param trigger_source FlexPWMPin from `BrushlessDriver::get_trigger_source()`.
- * @returns `true` on success, `false` if `trigger_source.module == nullptr`.
+ * @returns `true` on success, `false` if the module/submodule has no XBARA1 output.
  */
 inline bool connect_flexpwm_trigger_to_adc2(const pwm_hal::FlexPWMPin & trigger_source)
 {
     if (trigger_source.module == nullptr) { return false; }
+    const uint8_t xbar_in = flexpwm_pin_to_xbara1_in(trigger_source);
+    if (xbar_in == 255u) { return false; }
 
     CCM_CCGR2 |= CCM_CCGR2_XBAR1(CCM_CCGR_ON);
-
     // ADC2 is routed through ADC_ETC TRIG1 (configured in configure_adc_etc_trigger2)
-    xbar_connect(XBARA1_IN_FLEXPWM2_PWM2_OUT_TRIG0, XBARA1_OUT_ADC_ETC_TRIG01);
-
+    xbar_connect(xbar_in, XBARA1_OUT_ADC_ETC_TRIG01);
     return true;
 }
 
@@ -294,7 +296,7 @@ inline void configure_adc_etc_trig(uint8_t trig_idx, uint8_t adc_channel)
     const uint32_t chain_entry =
         ADC_ETC_TRIG_CHAIN_CSEL0(adc_channel)   |  // ADC channel selection
         ADC_ETC_TRIG_CHAIN_HWTS0(1u)            |  // hardware trigger select
-        ADC_ETC_TRIG_CHAIN_IE0(0b01u)           |  // DMA request on conversion done
+        ADC_ETC_TRIG_CHAIN_IE0(0b10u)           |  // DMA request on conversion done (0b10 = DMA, 0b01 = interrupt)
         ADC_ETC_TRIG_CHAIN_B2B0;                   // back-to-back trigger enable
 
     switch (trig_idx) {
@@ -346,7 +348,7 @@ inline void configure_adc_etc_trigger2(uint8_t adc_channel)
     ADC_ETC_TRIG1_CHAIN_1_0 =
         ADC_ETC_TRIG_CHAIN_CSEL0(adc_channel)   |
         ADC_ETC_TRIG_CHAIN_HWTS0(1u)            |
-        ADC_ETC_TRIG_CHAIN_IE0(0b01u)           |
+        ADC_ETC_TRIG_CHAIN_IE0(0b10u)           |  // DMA request (0b10), not interrupt (0b01)
         ADC_ETC_TRIG_CHAIN_B2B0;
 }
 

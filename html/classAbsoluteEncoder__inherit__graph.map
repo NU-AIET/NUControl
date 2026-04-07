@@ -1,0 +1,5 @@
+<map id="AbsoluteEncoder" name="AbsoluteEncoder">
+<area shape="rect" id="Node000001" title="Abstract interface for single&#45;turn absolute position encoders." alt="" coords="5,5,136,31"/>
+<area shape="rect" id="Node000002" href="$classSPIEncoder.html" title="SPI absolute encoder driver for AMS AS5047P / AS5147P." alt="" coords="23,79,118,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="73,44,73,79,68,79,68,44"/>
+</map>

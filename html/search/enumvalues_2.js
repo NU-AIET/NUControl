@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['cal_5fcs_5fphase_5fdir_5fa_0',['CAL_CS_PHASE_DIR_A',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5ca25578a9e68c0cb51e952347f4f0e796a',1,'nu_log']]],
+  ['cal_5fcs_5fphase_5fdir_5fb_1',['CAL_CS_PHASE_DIR_B',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5ca36234e70ae7c7dbe4bc940816a1be642',1,'nu_log']]],
+  ['cal_5fcs_5fphase_5fdir_5fc_2',['CAL_CS_PHASE_DIR_C',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5caf26fbf142314248814f1a664a49892b7',1,'nu_log']]],
+  ['cal_5fcs_5fphase_5fidx_5fa_3',['CAL_CS_PHASE_IDX_A',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5ca4edfac2637762bf54ac66a0afa780da2',1,'nu_log']]],
+  ['cal_5fcs_5fphase_5fidx_5fb_4',['CAL_CS_PHASE_IDX_B',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5ca7406a536e96652f947e246254fe2e521',1,'nu_log']]],
+  ['cal_5fcs_5fphase_5fidx_5fc_5',['CAL_CS_PHASE_IDX_C',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5cad5b5ce8a5f2929aadeb1665ac2fb514b',1,'nu_log']]],
+  ['cs_5falign_5fread_5fa_6',['CS_ALIGN_READ_A',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5ca15ebfd6d648f3a18b01ea84266aa2bd8',1,'nu_log']]],
+  ['cs_5falign_5fread_5fb_7',['CS_ALIGN_READ_B',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5ca5d10545b52e8dc0e0deb5c3b5d7e2e5a',1,'nu_log']]],
+  ['cs_5falign_5fread_5fc_8',['CS_ALIGN_READ_C',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5ca50d91aeab454674ebc8dfab1b2f86351',1,'nu_log']]],
+  ['cs_5falign_5fsensor_5fidx_9',['CS_ALIGN_SENSOR_IDX',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5ca0a38f38ec885d04725bb90957df71b00',1,'nu_log']]],
+  ['cs_5fdma_5fpin_5finvalid_10',['CS_DMA_PIN_INVALID',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5ca84ad92753d0465f0051092bdd3660253',1,'nu_log']]],
+  ['cs_5fno_5fcurrent_11',['CS_NO_CURRENT',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5ca5411ee415f129334a7b5c4dc6c11219f',1,'nu_log']]],
+  ['cs_5fnot_5faligned_12',['CS_NOT_ALIGNED',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5ca4bf0fd152fd7fb42be63706b1e02e409',1,'nu_log']]],
+  ['cs_5foffset_5fdeviation_13',['CS_OFFSET_DEVIATION',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5ca6908b4a6d4c3a92c5ffcd83fa55c5477',1,'nu_log']]],
+  ['cs_5foffset_5ffail_14',['CS_OFFSET_FAIL',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5caa060496fc86db5180840bb56d98e936f',1,'nu_log']]],
+  ['cs_5fsensor_5fcount_15',['CS_SENSOR_COUNT',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5cab08fe7c66885b1d9ee3c1e573d4a500d',1,'nu_log']]],
+  ['current_5fover_5flimit_16',['CURRENT_OVER_LIMIT',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5ca208b28e39d38913ff142b41f2bc74708',1,'nu_log']]],
+  ['current_5fsaturated_17',['CURRENT_SATURATED',['../namespacenu__log.html#a3b9e10fd683c4d039ed32a7707b6cf5cad03d4bf2243ede002a9dcbc328cafe84',1,'nu_log']]],
+  ['current_5fsense_5falign_5ffail_18',['CURRENT_SENSE_ALIGN_FAIL',['../errors_8hpp.html#a3878e89dc5c88d823f4f923ef90dbcb3ae78b93ceef1a74b27071bcb52b1f4dff',1,'errors.hpp']]],
+  ['current_5fsense_5finit_5ffail_19',['CURRENT_SENSE_INIT_FAIL',['../errors_8hpp.html#a3878e89dc5c88d823f4f923ef90dbcb3a7b936f22596e56b4f33d382fa91d4cb6',1,'errors.hpp']]],
+  ['current_5fsense_5fover_5flimit_20',['CURRENT_SENSE_OVER_LIMIT',['../errors_8hpp.html#a3878e89dc5c88d823f4f923ef90dbcb3ad8778954dd3562fab413e6b0b5e9801d',1,'errors.hpp']]],
+  ['current_5fsense_5fsaturation_21',['CURRENT_SENSE_SATURATION',['../errors_8hpp.html#ad58abd2ee29cc392489386b6ab9bdd2faf78c7cad0960d19855fa1b23c52536b2',1,'errors.hpp']]]
+];

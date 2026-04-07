@@ -1,0 +1,13 @@
+<map id="src/current_sense.hpp" name="src/current_sense.hpp">
+<area shape="rect" id="Node000001" title="Inline current sensing for three&#45;phase motor control." alt="" coords="123,5,287,31"/>
+<area shape="rect" id="Node000002" href="$brushless__controller_8hpp.html" title="Field&#45;Oriented Control (FOC) brushless motor controller." alt="" coords="34,79,237,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,43,148,80,145,77,182,39"/>
+<area shape="rect" id="Node000004" href="$nu__control_8hpp.html" title="Monolithic include header for the NUControl FOC library." alt="" coords="153,225,294,251"/>
+<area shape="poly" id="edge6_Node000001_Node000004" title=" " alt="" coords="228,39,241,57,251,78,257,120,252,162,242,200,231,226,226,224,237,198,247,161,252,120,246,79,237,60,224,42"/>
+<area shape="rect" id="Node000003" href="$cogging__mapper_8hpp.html" title="Automated cogging&#45;torque measurement sweep for AnticoggingCompensator." alt="" coords="5,152,185,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="124,118,104,153,99,151,120,115"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="163,111,182,129,199,151,216,190,224,224,219,226,211,192,194,153,178,133,160,115"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="129,182,204,223,201,227,127,186"/>
+<area shape="rect" id="Node000005" href="$example_8cpp.html" title="Exoskeleton ankle/knee joint test — single motor (U2523, GateDriver2)." alt="" coords="159,299,288,324"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="226,264,226,299,221,299,221,264"/>
+</map>

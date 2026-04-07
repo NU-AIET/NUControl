@@ -3,8 +3,8 @@
  * @brief Inline current sensing for three-phase motor control.
  *
  * @details Provides `InlineCurrentSensor` (single analog channel → Amps) and
- * `InlineCurrentSensorPackage` (2–3 sensors mapped to motor phases A/B/C via
- * automated calibration).
+ * `InlineCurrentSensorPackage<N>` (2 or 3 sensors mapped to motor phases A/B/C via
+ * automated calibration; N is a compile-time template parameter).
  *
  * ## Read paths
  * Two read paths are available:
@@ -36,7 +36,6 @@
 #define CURRENT_SENSE_HPP
 
 #include <array>
-#include <vector>
 #include <Arduino.h>
 #include <DMAChannel.h>
 #include "driver.hpp"
@@ -160,6 +159,7 @@ public:
    */
   float read() const
   {
+    Serial.println("I'm in here!");
     auto amps = gain_ * (analogRead(pin_) * ADC_GAIN_ - offset_);
     if (fabs(amps) > SATURATE_READING_) {
       nu_log::push(nu_log::Level::WARN, nu_log::Id::CURRENT_SATURATED, amps);
@@ -257,7 +257,11 @@ public:
   float read_dma() const
   {
     if (!dma_enabled_) { return 0.f; }
-    // dma_buf_ holds the raw ADC result (same format as analogRead() output)
+    // Invalidate the D-cache line covering dma_buf_ so the CPU reads the value
+    // written by DMA to physical RAM, not the stale cached value.
+    // On Cortex-M7 (Teensy 4.x), volatile prevents compiler re-use but does NOT
+    // flush the hardware cache; arm_dcache_delete() is required.
+    arm_dcache_delete(const_cast<uint16_t *>(&dma_buf_), sizeof(dma_buf_));
     auto amps = gain_ * (static_cast<float>(dma_buf_) * ADC_GAIN_ - offset_);
     if (fabs(amps) > SATURATE_READING_) {
       nu_log::push(nu_log::Level::WARN, nu_log::Id::CURRENT_SATURATED, amps);
@@ -368,11 +372,14 @@ private:
 // ===========================================================================
 
 /**
- * @brief A package of 2–3 `InlineCurrentSensor` instances mapped to motor phases.
+ * @brief A package of 2 or 3 `InlineCurrentSensor` instances mapped to motor phases.
  *
  * @details Manages sensor-to-phase assignment calibration and provides a unified
  * `get_phase_currents()` interface that reconstructs three-phase currents regardless
  * of how many sensors are physically installed.
+ *
+ * @tparam N Number of physical sensors. Must be 2 or 3; any other value is a
+ *           compile-time error.
  *
  * ## Sensor alignment
  * Call `align_sensors()` once at startup to:
@@ -388,30 +395,37 @@ private:
  * Kirchhoff's Current Law at the motor star point:
  * @f[ I_{\text{missing}} = -I_a - I_b @f]
  * This is valid for balanced (star-connected, no neutral current) three-phase loads.
+ *
+ * ## KCL correction (3-sensor mode)
+ * When all three phases are measured, the KCL constraint @f$ I_a + I_b + I_c = 0 @f$
+ * is used to correct for common-mode sensor bias. The minimum-variance estimate that
+ * satisfies the constraint is:
+ * @f[ I_x^* = I_x^{\text{meas}} - \frac{I_a^{\text{meas}} + I_b^{\text{meas}} + I_c^{\text{meas}}}{3} @f]
+ * This removes the shared offset error (e.g., from thermal drift or supply variation)
+ * while preserving the differential signal on each phase.
  */
+template<std::size_t N>
 class InlineCurrentSensorPackage
 {
+  static_assert(N == 2 || N == 3,
+                "InlineCurrentSensorPackage requires exactly 2 or 3 sensors");
+
 public:
   InlineCurrentSensorPackage() = default;
   ~InlineCurrentSensorPackage() = default;
 
   /**
-   * @brief Constructs a sensor package from a list of sensor pointers.
+   * @brief Constructs a sensor package from an array of sensor pointers.
    *
-   * @param sensors Vector of pointers to `InlineCurrentSensor` objects.
-   *                Must contain exactly 2 or 3 sensors; fewer sensors will
-   *                cause a diagnostic print but no hard failure.
+   * @param sensors Array of N pointers to `InlineCurrentSensor` objects.
+   *                All pointers must remain valid for the lifetime of this package.
    */
-  InlineCurrentSensorPackage(std::vector<InlineCurrentSensor *> sensors)
-  : sensors_(sensors),
-    num_sensors_(sensors_.size())
+  explicit InlineCurrentSensorPackage(std::array<InlineCurrentSensor *, N> sensors)
+  : sensors_(sensors)
   {
     nu_log::push(nu_log::Level::INFO, nu_log::Id::CS_SENSOR_COUNT,
-                 static_cast<float>(num_sensors_));
+                 static_cast<float>(N));
     nu_log::drain(Serial);
-    if (num_sensors_ < 2) {
-      return;
-    }
   }
 
   /**
@@ -427,7 +441,7 @@ public:
   bool init_sensors()
   {
     bool all_inited = true;
-    for (size_t i = 0; i < num_sensors_; ++i) {
+    for (size_t i = 0; i < N; ++i) {
       all_inited &= sensors_.at(i)->init_sensor();
     }
     return all_inited;
@@ -474,30 +488,39 @@ public:
   bool align_sensors(BrushlessDriver & driver, float align_volts = 0.5f)
   {
 
+    Serial.println("I got here!");
+
     driver.enable();
 
     driver.set_phase_voltages({align_volts, 0, 0});
     delay(100);
-    auto reads_a = read_sensors();
+    Serial.println("I got here2!");
+
+    auto reads_a = read_dma_sensors();
+    Serial.println("I got here22!");
+
     driver.set_phase_voltages({0, 0, 0});
     delay(100);
 
+    
     driver.set_phase_voltages({0, align_volts, 0});
     delay(100);
-    auto reads_b = read_sensors();
+    auto reads_b = read_dma_sensors();
     driver.set_phase_voltages({0, 0, 0});
     delay(100);
 
     driver.set_phase_voltages({0, 0, align_volts});
     delay(100);
-    auto reads_c = read_sensors();
+    auto reads_c = read_dma_sensors();
     driver.set_phase_voltages({0, 0, 0});
 
     driver.disable();
 
-    std::array<PhaseValues<float>, 3> sensor_readings;
+    Serial.println("I got here3!");
 
-    for (size_t i = 0; i < num_sensors_; ++i) {
+    std::array<PhaseValues<float>, N> sensor_readings;
+
+    for (size_t i = 0; i < N; ++i) {
       nu_log::push(nu_log::Level::INFO, nu_log::Id::CS_ALIGN_SENSOR_IDX,
                    static_cast<float>(i));
       nu_log::push(nu_log::Level::INFO, nu_log::Id::CS_ALIGN_READ_A, reads_a.at(i));
@@ -507,7 +530,7 @@ public:
       sensor_readings.at(i) = {reads_a.at(i), reads_b.at(i), reads_c.at(i)};
     }
 
-    for (size_t i = 0; i < num_sensors_; ++i) {
+    for (size_t i = 0; i < N; ++i) {
       const auto max_ =
         max(
         fabs(sensor_readings.at(i).a),
@@ -581,12 +604,23 @@ public:
    *
    * @details Reads all sensors (software or DMA path), maps sensor indices to
    * phases using `phase_idx_`, applies direction signs via `phase_dirs_`, and
-   * reconstructs the missing phase via KCL if only two sensors are present.
+   * either reconstructs the missing phase (2-sensor mode) or applies KCL-based
+   * correction (3-sensor mode).
    *
    * Dispatch order:
    * 1. DMA path (`dma_mode_ == true`): reads from `dma_buf_` in each sensor.
    * 2. Filtered software path (`filter == true`): `analogRead()` + discrete filter.
    * 3. Raw software path: unfiltered `analogRead()`.
+   *
+   * ### 2-sensor mode
+   * The unmeasured phase is inferred via KCL: @f$ I_{\text{missing}} = -I_a - I_b @f$.
+   *
+   * ### 3-sensor mode
+   * All three phases are measured directly. The KCL residual
+   * @f$ \varepsilon = (I_a + I_b + I_c) / 3 @f$ is subtracted from each phase,
+   * enforcing the star-point constraint while minimising the disturbance to each
+   * individual measurement. This removes common-mode sensor drift without
+   * discarding any measurement.
    *
    * @param filter If `true` (and DMA mode is off), applies the configured
    *               `DiscreteFilter` to each raw reading.
@@ -604,9 +638,7 @@ public:
       return {};
     }
 
-    PhaseValues<float> phase_amps;
-
-    std::array<float, 3> amps{0.f, 0.f, 0.f};
+    std::array<float, N> amps{};
 
     if (dma_mode_) {
       amps = read_dma_sensors();
@@ -615,6 +647,8 @@ public:
     } else {
       amps = read_sensors();
     }
+
+    PhaseValues<float> phase_amps{0.f, 0.f, 0.f};
 
     if (phase_idx_.a > -1) {
       phase_amps.a = phase_dirs_.a * amps.at(phase_idx_.a);
@@ -626,12 +660,19 @@ public:
       phase_amps.c = phase_dirs_.c * amps.at(phase_idx_.c);
     }
 
-    if (num_sensors_ == 3) {
-      // Assume no one would have more than 3 sensors
+    if constexpr (N == 3) {
+      // KCL correction: subtract the shared offset error from each phase.
+      // For an ideal star-connected load, I_a + I_b + I_c = 0. Any non-zero
+      // sum is common-mode sensor bias; distributing it equally across all
+      // three phases is the minimum-variance correction that enforces the constraint.
+      const float kcl_error = (phase_amps.a + phase_amps.b + phase_amps.c) / 3.f;
+      phase_amps.a -= kcl_error;
+      phase_amps.b -= kcl_error;
+      phase_amps.c -= kcl_error;
       return phase_amps;
     }
 
-    // KCL reconstruction: I_missing = -I_a - I_b (sum at neutral point = 0)
+    // 2-sensor mode: KCL reconstruction of the unmeasured phase.
     if (phase_idx_.a == -1) {
       phase_amps.a = -phase_amps.b - phase_amps.c;
     }
@@ -651,7 +692,7 @@ public:
    */
   void set_filters(DiscreteFilter<float, float> filter)
   {
-    for (size_t i = 0; i < num_sensors_; ++i) {
+    for (size_t i = 0; i < N; ++i) {
       sensors_.at(i)->set_filter(filter);
     }
   }
@@ -659,6 +700,24 @@ public:
   // -------------------------------------------------------------------------
   // DMA path
   // -------------------------------------------------------------------------
+
+  /**
+   * @brief Reads all sensors in physical order without requiring phase alignment.
+   *
+   * @details Returns raw `analogRead()` current values indexed by sensor number
+   * (not by motor phase).  Bypasses the `aligned_` guard in `get_phase_currents()`.
+   * Intended exclusively for pre-calibration routines such as
+   * `BrushlessController::identify_rl()` where the sensor-to-phase mapping has
+   * not yet been established.
+   *
+   * @returns `std::array<float, N>` of current readings [A], indexed by sensor
+   *          position (0 … N−1).
+   *
+   * @warning Blocking (~3–5 µs per sensor). Do not call from the control ISR.
+   * @warning Do not call after `init_dma_sensors()` — `analogRead()` resets
+   *          the ADC to software-trigger mode, silently disabling the DMA path.
+   */
+  std::array<float, N> read_unaligned() const { return read_sensors(); }
 
   /**
    * @brief Initialises DMA-backed reads for all sensors in the package.
@@ -701,30 +760,12 @@ public:
    * @warning Do NOT call `analogRead()` on any sensor pin after this function
    *          returns. Doing so resets `ADC_SC2 = 0` (software trigger mode).
    */
-  /**
-   * @brief Reads all sensors in physical order without requiring phase alignment.
-   *
-   * @details Returns raw `analogRead()` current values indexed by sensor number
-   * (not by motor phase).  Bypasses the `aligned_` guard in `get_phase_currents()`.
-   * Intended exclusively for pre-calibration routines such as
-   * `BrushlessController::identify_rl()` where the sensor-to-phase mapping has
-   * not yet been established.
-   *
-   * @returns `std::array<float, 3>` of current readings [A], indexed by sensor
-   *          position.  Positions beyond `num_sensors_` are zero.
-   *
-   * @warning Blocking (~3–5 µs per sensor). Do not call from the control ISR.
-   * @warning Do not call after `init_dma_sensors()` — `analogRead()` resets
-   *          the ADC to software-trigger mode, silently disabling the DMA path.
-   */
-  std::array<float, 3> read_unaligned() const { return read_sensors(); }
-
   bool init_dma_sensors(const pwm_hal::FlexPWMPin & trigger_source)
   {
     bool all_ok = true;
     bool adc1_hw_trigger_configured = false;
 
-    for (uint8_t i = 0; i < static_cast<uint8_t>(num_sensors_); ++i) {
+    for (uint8_t i = 0; i < static_cast<uint8_t>(N); ++i) {
       const int arduino_pin = sensors_.at(i)->get_pin();
 
       // Resolve pin to ADC channel
@@ -770,58 +811,41 @@ public:
   }
 
 private:
-  std::vector<InlineCurrentSensor *> sensors_; ///< Pointers to the physical sensors
-  size_t num_sensors_;                          ///< Number of sensors (2 or 3)
-  PhaseValues<int> phase_idx_{-1, -1, -1};     ///< sensor index for each phase; -1 = unmeasured
-  PhaseValues<int> phase_dirs_{0, 0, 0};        ///< direction sign (+1 or -1) per phase
+  std::array<InlineCurrentSensor *, N> sensors_{}; ///< Pointers to the N physical sensors.
+  PhaseValues<int> phase_idx_{-1, -1, -1}; ///< Sensor index for each phase; -1 = unmeasured.
+  PhaseValues<int> phase_dirs_{0, 0, 0};   ///< Direction sign (+1 or -1) per phase.
 
-  bool aligned_  = false; ///< True after align_sensors() or load_calibration() succeeds
-  bool dma_mode_ = false; ///< True after init_dma_sensors() succeeds
+  bool aligned_  = false; ///< True after align_sensors() or load_calibration() succeeds.
+  bool dma_mode_ = false; ///< True after init_dma_sensors() succeeds.
 
-  /**
-   * @brief Reads all sensors once via `analogRead()` (no filter).
-   *
-   * @details Returns up to 3 readings in a fixed-size array. Positions beyond
-   * `num_sensors_` are zero-initialised.
-   *
-   * @returns Array of raw current readings [A], indexed by sensor number.
-   *
-   * @note Changed from `std::vector<float>` to `std::array<float,3>` to eliminate
-   *       heap allocation inside the control ISR (called every 100 µs).
-   *
-   * @todo Replace with a stack-allocated `std::array<float, N>` templated on
-   *       sensor count when a `constexpr` sensor count is available.
-   */
-  std::array<float, 3> read_sensors() const
+  /// @brief Reads all N sensors once via `analogRead()` (no filter).
+  /// @returns Array of raw current readings [A], indexed by sensor number.
+  std::array<float, N> read_sensors() const
   {
-    std::array<float, 3> reads{0.f, 0.f, 0.f};
-    for (size_t i = 0; i < num_sensors_; ++i) {
+    std::array<float, N> reads{};
+    for (size_t i = 0; i < N; ++i) {
       reads.at(i) = sensors_.at(i)->read();
     }
     return reads;
   }
 
-  /**
-   * @brief Reads all sensors via `analogRead()` and applies the configured filter.
-   * @returns Filtered current readings [A], indexed by sensor number.
-   */
-  std::array<float, 3> read_filtered_sensors()
+  /// @brief Reads all N sensors via `analogRead()` and applies the configured filter.
+  /// @returns Filtered current readings [A], indexed by sensor number.
+  std::array<float, N> read_filtered_sensors()
   {
-    std::array<float, 3> reads{0.f, 0.f, 0.f};
-    for (size_t i = 0; i < num_sensors_; ++i) {
+    std::array<float, N> reads{};
+    for (size_t i = 0; i < N; ++i) {
       reads.at(i) = sensors_.at(i)->read_filtered();
     }
     return reads;
   }
 
-  /**
-   * @brief Reads all sensors from DMA buffers (non-blocking).
-   * @returns DMA-sourced current readings [A], indexed by sensor number.
-   */
-  std::array<float, 3> read_dma_sensors()
+  /// @brief Reads all N sensors from DMA buffers (non-blocking).
+  /// @returns DMA-sourced current readings [A], indexed by sensor number.
+  std::array<float, N> read_dma_sensors()
   {
-    std::array<float, 3> reads{0.f, 0.f, 0.f};
-    for (size_t i = 0; i < num_sensors_; ++i) {
+    std::array<float, N> reads{};
+    for (size_t i = 0; i < N; ++i) {
       reads.at(i) = sensors_.at(i)->read_dma();
     }
     return reads;

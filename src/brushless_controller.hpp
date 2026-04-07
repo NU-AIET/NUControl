@@ -129,6 +129,7 @@ struct BrushlessCalibration
  * ctrl.update_control();
  * @endcode
  */
+template<std::size_t N = 2>
 class BrushlessController
 {
 public:
@@ -151,7 +152,7 @@ public:
   BrushlessController(
     MotorParameters motor,
     BrushlessDriver & motor_driver,
-    InlineCurrentSensorPackage & current_sensors,
+    InlineCurrentSensorPackage<N> & current_sensors,
     AbsoluteEncoder & pos_sensor)
   : motor_(motor),
     driver_(motor_driver),
@@ -1163,7 +1164,7 @@ public:
 private:
   MotorParameters              motor_;
   BrushlessDriver &            driver_;
-  InlineCurrentSensorPackage & cs_;
+  InlineCurrentSensorPackage<N> & cs_;
   AbsoluteEncoder &            position_sensor_;
 
   PhaseValues<Butterworth2nd<float>> applited_voltage_filters_; ///< Applied-voltage smoothing
@@ -1191,7 +1192,7 @@ private:
   Butterworth2nd<float> vel_filter_cutoff_ = Butterworth2nd<float>(100.f, 10000.f); ///< 2nd-order 100 Hz LP
 
   VelocityPLL velocity_pll_;           ///< PLL position/velocity observer
-  bool         use_velocity_pll_ = false; ///< Route sensor update through PLL instead of FIR+Butterworth
+  bool         use_velocity_pll_ = true; ///< Route sensor update through PLL instead of FIR+Butterworth
 
   float cogging_offset_ = 0.f;  ///< Shaft angle offset for cogging map lookup [rad]
 

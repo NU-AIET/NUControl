@@ -1,0 +1,17 @@
+<map id="src/vel_filters.hpp" name="src/vel_filters.hpp">
+<area shape="rect" id="Node000001" title="Pre&#45;designed velocity estimation FIR filter coefficients and instances." alt="" coords="127,5,264,31"/>
+<area shape="rect" id="Node000002" href="$discrete__filter_8hpp.html" title="General discrete&#45;time IIR/FIR filter, Butterworth 2nd&#45;order, PI controller, and motor feedforward fil..." alt="" coords="66,79,205,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,33,156,70,152,66,183,29"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="229,79,285,104"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="207,29,240,66,236,70,203,33"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,152,68,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="121,106,65,146,62,142,118,102"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="93,152,178,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="138,104,138,138,133,138,133,104"/>
+<area shape="rect" id="Node000005" href="$helpers_8hpp.html" title="Math utility constants and functions for FOC computations." alt="" coords="202,152,301,177"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="155,102,222,142,219,147,153,106"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="173,225,241,251"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="246,179,224,215,219,212,242,176"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="265,225,325,251"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="261,176,283,212,279,215,256,179"/>
+</map>

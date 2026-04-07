@@ -1,0 +1,5 @@
+<map id="PIController&lt; T &gt;" name="PIController&lt; T &gt;">
+<area shape="rect" id="Node000001" title="Discrete&#45;time PI controller using the Tustin (trapezoidal) method." alt="" coords="5,93,141,119"/>
+<area shape="rect" id="Node000002" href="$classDiscreteFilter.html" title=" " alt="" coords="5,5,141,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="76,59,76,93,71,93,71,59"/>
+</map>

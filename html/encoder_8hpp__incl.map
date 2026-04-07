@@ -1,0 +1,24 @@
+<map id="src/encoder.hpp" name="src/encoder.hpp">
+<area shape="rect" id="Node000001" title="Multi&#45;turn angle tracking struct and abstract absolute encoder interface." alt="" coords="217,5,341,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,89,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="243,33,99,77,97,72,241,28"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="114,79,183,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="260,33,183,74,181,70,257,28"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="208,79,263,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="274,32,252,68,247,66,270,30"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="287,79,362,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="289,30,312,66,308,69,285,32"/>
+<area shape="rect" id="Node000006" href="$helpers_8hpp.html" title="Math utility constants and functions for FOC computations." alt="" coords="350,152,449,177"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="309,28,344,48,376,77,392,107,399,138,394,139,387,109,372,80,341,52,307,33"/>
+<area shape="rect" id="Node000009" href="$discrete__filter_8hpp.html" title="General discrete&#45;time IIR/FIR filter, Butterworth 2nd&#45;order, PI controller, and motor feedforward fil..." alt="" coords="437,79,575,104"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="317,28,457,72,455,77,315,33"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="321,225,389,251"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="394,179,372,215,367,212,390,176"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="413,225,473,251"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="409,176,431,212,427,215,404,179"/>
+<area shape="poly" id="edge11_Node000009_Node000006" title=" " alt="" coords="490,106,430,147,427,142,487,102"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="473,152,536,177"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="508,104,508,139,502,138,503,104"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="561,152,646,177"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="523,102,578,141,575,146,520,106"/>
+</map>

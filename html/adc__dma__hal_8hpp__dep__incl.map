@@ -1,0 +1,17 @@
+<map id="src/adc_dma_hal.hpp" name="src/adc_dma_hal.hpp">
+<area shape="rect" id="Node000001" title="iMXRT1062 ADC hardware&#45;trigger + XBAR1 + DMA hardware abstraction layer." alt="" coords="26,5,185,31"/>
+<area shape="rect" id="Node000002" href="$brushless__controller_8hpp.html" title="Field&#45;Oriented Control (FOC) brushless motor controller." alt="" coords="48,152,251,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,43,133,103,148,151,143,153,128,105,110,45"/>
+<area shape="rect" id="Node000004" href="$nu__control_8hpp.html" title="Monolithic include header for the NUControl FOC library." alt="" coords="117,299,259,324"/>
+<area shape="poly" id="edge9_Node000001_Node000004" title=" " alt="" coords="87,43,54,84,23,138,13,167,8,195,11,223,24,249,42,269,65,284,91,294,118,301,116,306,90,299,63,288,39,273,19,252,6,225,3,195,8,165,18,136,50,81,83,39"/>
+<area shape="rect" id="Node000006" href="$current__sense_8hpp.html" title="Inline current sensing for three&#45;phase motor control." alt="" coords="143,79,307,104"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="138,35,207,76,204,81,135,40"/>
+<area shape="rect" id="Node000003" href="$cogging__mapper_8hpp.html" title="Automated cogging&#45;torque measurement sweep for AnticoggingCompensator." alt="" coords="34,225,214,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="143,191,131,226,126,224,138,189"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="187,182,211,200,229,224,233,245,226,267,202,300,198,297,222,264,227,245,224,226,207,204,184,186"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="146,259,180,297,176,300,142,263"/>
+<area shape="rect" id="Node000005" href="$example_8cpp.html" title="Exoskeleton ankle/knee joint test — single motor (U2523, GateDriver2)." alt="" coords="123,372,253,397"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="191,338,191,372,185,372,185,338"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="205,115,164,154,160,150,201,111"/>
+<area shape="poly" id="edge8_Node000006_Node000004" title=" " alt="" coords="246,114,257,131,265,151,267,165,265,178,262,216,249,252,228,280,205,301,202,297,224,276,244,249,257,215,260,177,262,165,260,153,252,134,241,116"/>
+</map>

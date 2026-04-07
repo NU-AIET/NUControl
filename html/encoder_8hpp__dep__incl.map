@@ -1,0 +1,15 @@
+<map id="src/encoder.hpp" name="src/encoder.hpp">
+<area shape="rect" id="Node000001" title="Multi&#45;turn angle tracking struct and abstract absolute encoder interface." alt="" coords="205,5,329,31"/>
+<area shape="rect" id="Node000002" href="$brushless__controller_8hpp.html" title="Field&#45;Oriented Control (FOC) brushless motor controller." alt="" coords="97,79,299,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="248,43,211,80,207,77,245,39"/>
+<area shape="rect" id="Node000006" href="$spi__encoder_8hpp.html" title="SPI absolute encoder driver for AMS AS5047P / AS5147P with DMA async reads and parity / error&#45;flag va..." alt="" coords="261,152,412,177"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="289,40,314,77,329,117,337,151,332,153,324,119,309,80,284,43"/>
+<area shape="rect" id="Node000003" href="$cogging__mapper_8hpp.html" title="Automated cogging&#45;torque measurement sweep for AnticoggingCompensator." alt="" coords="5,152,185,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="172,114,114,154,111,150,169,110"/>
+<area shape="rect" id="Node000004" href="$nu__control_8hpp.html" title="Monolithic include header for the NUControl FOC library." alt="" coords="153,225,294,251"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="205,117,224,225,219,226,200,118"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="129,182,204,223,201,227,127,186"/>
+<area shape="rect" id="Node000005" href="$example_8cpp.html" title="Exoskeleton ankle/knee joint test — single motor (U2523, GateDriver2)." alt="" coords="159,299,288,324"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="226,264,226,299,221,299,221,264"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="308,187,243,227,240,223,305,183"/>
+</map>

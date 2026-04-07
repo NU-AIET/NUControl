@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classDiscreteFilter.html" title=" " alt="" coords="5,23,141,63"/>
+<area shape="rect" id="Node000001" href="$classButterworth2nd.html" title="2nd&#45;order Butterworth low&#45;pass filter discretised via bilinear transform." alt="" coords="189,5,351,31"/>
+<area shape="poly" id="edge3_Node000000_Node000001" title=" " alt="" coords="155,30,189,26,189,31,155,35"/>
+<area shape="rect" id="Node000002" href="$classPIController.html" title="Discrete&#45;time PI controller using the Tustin (trapezoidal) method." alt="" coords="202,55,338,80"/>
+<area shape="poly" id="edge4_Node000000_Node000002" title=" " alt="" coords="155,51,202,56,201,62,155,56"/>
+</map>

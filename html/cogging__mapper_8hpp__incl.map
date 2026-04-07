@@ -1,0 +1,77 @@
+<map id="src/cogging_mapper.hpp" name="src/cogging_mapper.hpp">
+<area shape="rect" id="Node000001" title="Automated cogging&#45;torque measurement sweep for AnticoggingCompensator." alt="" coords="1129,5,1309,31"/>
+<area shape="rect" id="Node000002" href="$brushless__controller_8hpp.html" title="Field&#45;Oriented Control (FOC) brushless motor controller." alt="" coords="939,79,1119,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1189,33,1074,76,1072,71,1187,28"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="1420,225,1476,251"/>
+<area shape="poly" id="edge47_Node000001_Node000013" title=" " alt="" coords="1242,28,1318,76,1362,111,1403,150,1425,181,1441,211,1436,214,1420,184,1399,154,1359,115,1315,80,1239,33"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="823,152,966,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1009,106,930,148,928,143,1006,102"/>
+<area shape="rect" id="Node000004" href="$driver_8hpp.html" title="Three&#45;phase and two&#45;phase motor gate driver wrappers." alt="" coords="593,225,679,251"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="1028,105,1012,142,998,163,980,180,958,191,928,201,851,217,694,235,693,230,851,211,926,196,956,186,977,175,994,159,1008,140,1023,103"/>
+<area shape="rect" id="Node000006" href="$transformations_8hpp.html" title="Coordinate&#45;frame structs and Clarke/Park transform functions for FOC." alt="" coords="853,299,1008,324"/>
+<area shape="poly" id="edge33_Node000002_Node000006" title=" " alt="" coords="1043,102,1061,124,1076,151,1085,179,1090,203,1088,226,1075,252,1048,279,1013,297,1011,292,1045,275,1071,249,1083,225,1085,203,1080,181,1071,153,1057,127,1039,106"/>
+<area shape="rect" id="Node000012" href="$current__sense_8hpp.html" title="Inline current sensing for three&#45;phase motor control." alt="" coords="537,152,679,177"/>
+<area shape="poly" id="edge12_Node000002_Node000012" title=" " alt="" coords="962,107,690,152,689,147,961,101"/>
+<area shape="rect" id="Node000020" href="$discrete__filter_8hpp.html" title="General discrete&#45;time IIR/FIR filter, Butterworth 2nd&#45;order, PI controller, and motor feedforward fil..." alt="" coords="1413,299,1552,324"/>
+<area shape="poly" id="edge41_Node000002_Node000020" title=" " alt="" coords="1069,102,1134,122,1206,150,1282,183,1355,223,1457,288,1454,293,1352,228,1280,188,1204,154,1132,127,1067,107"/>
+<area shape="rect" id="Node000023" href="$adc__dma__hal_8hpp.html" title="iMXRT1062 ADC hardware&#45;trigger + XBAR1 + DMA hardware abstraction layer." alt="" coords="432,225,568,251"/>
+<area shape="poly" id="edge43_Node000002_Node000023" title=" " alt="" coords="939,94,829,97,707,106,650,113,598,124,556,137,527,154,517,166,510,181,503,212,498,211,505,179,512,163,524,150,554,132,597,119,649,108,707,100,829,92,939,89"/>
+<area shape="rect" id="Node000024" href="$encoder_8hpp.html" title="Multi&#45;turn angle tracking struct and abstract absolute encoder interface." alt="" coords="1193,225,1295,251"/>
+<area shape="poly" id="edge34_Node000002_Node000024" title=" " alt="" coords="1073,102,1124,121,1176,150,1208,180,1232,212,1228,215,1204,184,1173,154,1122,125,1071,107"/>
+<area shape="rect" id="Node000027" href="$motors_8hpp.html" title="Motor electrical parameter structs and pre&#45;defined motor instances." alt="" coords="703,152,799,177"/>
+<area shape="poly" id="edge42_Node000002_Node000027" title=" " alt="" coords="985,107,810,151,808,146,984,101"/>
+<area shape="rect" id="Node000028" href="$thermal__model_8hpp.html" title="Temperature sensor abstraction and two&#45;node winding thermal model for motor current derating." alt="" coords="680,299,829,324"/>
+<area shape="poly" id="edge44_Node000002_Node000028" title=" " alt="" coords="1032,105,1027,140,1021,160,1010,179,966,222,915,255,862,280,814,297,812,292,860,275,912,250,963,217,1006,176,1016,158,1022,139,1027,104"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="417,372,501,397"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="596,253,532,275,504,288,486,300,470,328,463,359,458,358,465,327,482,297,501,283,530,270,595,248"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="680,247,871,293,869,298,679,252"/>
+<area shape="rect" id="Node000010" href="$pwm__hal_8hpp.html" title="iMXRT1062 FlexPWM hardware abstraction layer for center&#45;aligned PWM." alt="" coords="496,299,605,324"/>
+<area shape="poly" id="edge9_Node000004_Node000010" title=" " alt="" coords="624,253,577,292,573,288,621,249"/>
+<area shape="rect" id="Node000007" href="$helpers_8hpp.html" title="Math utility constants and functions for FOC computations." alt="" coords="1097,372,1196,397"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="966,321,1100,365,1098,370,965,327"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="873,445,941,471"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="1109,400,955,445,953,440,1107,395"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="1117,445,1177,471"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="1149,398,1149,432,1144,432,1144,398"/>
+<area shape="poly" id="edge10_Node000010_Node000005" title=" " alt="" coords="538,326,486,366,483,361,534,322"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="608,372,677,397"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="567,322,619,361,615,366,564,326"/>
+<area shape="poly" id="edge16_Node000012_Node000004" title=" " alt="" coords="615,177,629,212,624,214,610,179"/>
+<area shape="poly" id="edge14_Node000012_Node000005" title=" " alt="" coords="537,170,462,178,378,199,338,216,300,238,267,266,241,300,234,320,240,336,255,350,278,360,339,374,403,379,402,385,338,379,276,365,252,354,235,339,229,320,236,297,263,262,297,234,335,211,377,194,461,173,537,164"/>
+<area shape="poly" id="edge17_Node000012_Node000007" title=" " alt="" coords="659,175,823,220,923,255,1021,296,1077,329,1123,361,1120,366,1074,333,1019,301,921,260,822,225,658,180"/>
+<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="679,173,691,175,876,191,1021,200,1165,208,1351,223,1407,229,1406,234,1350,228,1165,213,1020,205,876,197,690,180,678,179"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="251,299,370,324"/>
+<area shape="poly" id="edge15_Node000012_Node000014" title=" " alt="" coords="556,180,490,199,421,228,373,259,335,291,331,287,370,254,419,223,488,194,554,175"/>
+<area shape="rect" id="Node000015" href="$errors_8hpp.html" title="Error and warning codes with associated handler callbacks." alt="" coords="87,225,175,251"/>
+<area shape="poly" id="edge18_Node000012_Node000015" title=" " alt="" coords="538,178,195,228,188,229,187,224,194,223,537,173"/>
+<area shape="poly" id="edge24_Node000012_Node000020" title=" " alt="" coords="679,173,691,175,785,182,865,184,1002,183,1067,184,1137,189,1216,201,1308,223,1366,249,1449,290,1447,295,1364,254,1306,228,1215,207,1137,194,1067,189,1002,188,865,190,785,188,690,180,678,179"/>
+<area shape="poly" id="edge28_Node000012_Node000023" title=" " alt="" coords="592,180,531,220,528,215,589,175"/>
+<area shape="rect" id="Node000016" href="$nu__log_8hpp.html" title="ISR&#45;safe, non&#45;blocking structured logger for NUControl." alt="" coords="83,299,176,324"/>
+<area shape="poly" id="edge19_Node000015_Node000016" title=" " alt="" coords="133,251,132,285,127,285,128,251"/>
+<area shape="poly" id="edge20_Node000016_Node000005" title=" " alt="" coords="177,320,403,369,402,374,176,325"/>
+<area shape="rect" id="Node000017" title=" " alt="" coords="5,372,72,397"/>
+<area shape="poly" id="edge21_Node000016_Node000017" title=" " alt="" coords="116,326,66,365,63,361,113,322"/>
+<area shape="rect" id="Node000018" title=" " alt="" coords="96,372,163,397"/>
+<area shape="poly" id="edge22_Node000016_Node000018" title=" " alt="" coords="132,324,132,358,127,358,127,324"/>
+<area shape="rect" id="Node000019" title=" " alt="" coords="187,372,248,397"/>
+<area shape="poly" id="edge23_Node000016_Node000019" title=" " alt="" coords="145,322,194,361,191,365,142,326"/>
+<area shape="poly" id="edge27_Node000020_Node000007" title=" " alt="" coords="1429,327,1210,373,1209,368,1428,321"/>
+<area shape="rect" id="Node000021" title=" " alt="" coords="1402,372,1465,397"/>
+<area shape="poly" id="edge25_Node000020_Node000021" title=" " alt="" coords="1477,326,1451,362,1447,359,1472,323"/>
+<area shape="rect" id="Node000022" title=" " alt="" coords="1489,372,1575,397"/>
+<area shape="poly" id="edge26_Node000020_Node000022" title=" " alt="" coords="1493,323,1518,359,1514,362,1489,326"/>
+<area shape="poly" id="edge29_Node000023_Node000005" title=" " alt="" coords="484,253,461,273,442,300,439,314,440,330,449,359,443,360,434,330,434,314,438,298,457,269,480,249"/>
+<area shape="poly" id="edge32_Node000023_Node000010" title=" " alt="" coords="511,249,537,286,532,289,506,253"/>
+<area shape="poly" id="edge30_Node000023_Node000011" title=" " alt="" coords="542,248,582,267,602,280,619,297,636,327,643,357,638,359,631,329,615,300,599,285,580,272,539,253"/>
+<area shape="poly" id="edge31_Node000023_Node000014" title=" " alt="" coords="471,253,355,296,354,291,469,248"/>
+<area shape="poly" id="edge35_Node000024_Node000005" title=" " alt="" coords="1202,253,1137,274,1065,301,1044,314,1021,327,940,340,799,356,514,381,514,376,799,350,939,335,1019,321,1041,310,1063,296,1135,269,1200,248"/>
+<area shape="poly" id="edge39_Node000024_Node000007" title=" " alt="" coords="1252,251,1261,285,1261,306,1254,325,1231,351,1201,369,1198,364,1227,347,1250,323,1256,305,1256,286,1247,252"/>
+<area shape="poly" id="edge36_Node000024_Node000011" title=" " alt="" coords="1226,253,1157,290,1112,310,1065,327,962,351,859,368,691,384,691,379,858,363,961,346,1063,321,1110,305,1154,285,1224,248"/>
+<area shape="poly" id="edge40_Node000024_Node000020" title=" " alt="" coords="1283,248,1432,292,1430,297,1282,253"/>
+<area shape="rect" id="Node000025" title=" " alt="" coords="1185,299,1239,324"/>
+<area shape="poly" id="edge37_Node000024_Node000025" title=" " alt="" coords="1241,252,1225,287,1220,285,1236,250"/>
+<area shape="rect" id="Node000026" title=" " alt="" coords="1315,299,1389,324"/>
+<area shape="poly" id="edge38_Node000024_Node000026" title=" " alt="" coords="1263,248,1324,289,1321,293,1260,253"/>
+<area shape="poly" id="edge45_Node000028_Node000005" title=" " alt="" coords="708,327,515,373,513,368,706,321"/>
+<area shape="poly" id="edge46_Node000028_Node000008" title=" " alt="" coords="769,323,886,434,883,438,765,326"/>
+</map>

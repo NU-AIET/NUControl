@@ -1,0 +1,25 @@
+<map id="src/pwm_hal.hpp" name="src/pwm_hal.hpp">
+<area shape="rect" id="Node000001" title="iMXRT1062 FlexPWM hardware abstraction layer for center&#45;aligned PWM." alt="" coords="57,5,189,31"/>
+<area shape="rect" id="Node000002" href="$adc__dma__hal_8hpp.html" title="iMXRT1062 ADC hardware&#45;trigger + XBAR1 + DMA hardware abstraction layer." alt="" coords="43,79,202,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,44,125,79,120,79,120,44"/>
+<area shape="rect" id="Node000005" href="$nu__control_8hpp.html" title="Monolithic include header for the NUControl FOC library." alt="" coords="100,372,241,397"/>
+<area shape="poly" id="edge15_Node000001_Node000005" title=" " alt="" coords="84,39,57,57,33,80,19,101,12,119,8,163,8,239,12,263,22,285,37,305,55,322,98,351,139,369,137,374,96,355,52,327,33,309,17,288,7,265,3,240,3,163,7,117,14,98,29,77,53,53,82,35"/>
+<area shape="rect" id="Node000008" href="$driver_8hpp.html" title="Three&#45;phase and two&#45;phase motor gate driver wrappers." alt="" coords="266,79,377,104"/>
+<area shape="poly" id="edge11_Node000001_Node000008" title=" " alt="" coords="168,33,290,76,288,81,167,38"/>
+<area shape="rect" id="Node000003" href="$brushless__controller_8hpp.html" title="Field&#45;Oriented Control (FOC) brushless motor controller." alt="" coords="144,225,347,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="125,117,129,147,142,176,156,191,174,204,210,223,208,228,171,209,153,195,138,179,124,149,120,118"/>
+<area shape="poly" id="edge10_Node000002_Node000005" title=" " alt="" coords="119,118,112,159,107,211,109,268,122,323,139,349,159,370,155,374,135,353,118,325,104,269,101,211,106,158,114,117"/>
+<area shape="rect" id="Node000007" href="$current__sense_8hpp.html" title="Inline current sensing for three&#45;phase motor control." alt="" coords="153,152,317,177"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="154,109,218,150,215,154,151,114"/>
+<area shape="rect" id="Node000004" href="$cogging__mapper_8hpp.html" title="Automated cogging&#45;torque measurement sweep for AnticoggingCompensator." alt="" coords="145,299,325,324"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="244,265,239,299,234,298,239,264"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="289,254,313,268,333,285,343,304,343,315,338,325,319,346,295,361,269,372,242,379,241,374,267,367,292,357,315,342,334,323,338,313,338,305,329,288,310,272,286,259"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="217,336,183,374,179,370,213,333"/>
+<area shape="rect" id="Node000006" href="$example_8cpp.html" title="Exoskeleton ankle/knee joint test — single motor (U2523, GateDriver2)." alt="" coords="106,445,235,471"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="173,411,173,445,168,445,168,411"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="241,191,246,225,241,226,236,192"/>
+<area shape="poly" id="edge9_Node000007_Node000005" title=" " alt="" coords="185,185,156,202,134,227,124,252,122,273,135,323,147,349,162,370,158,373,142,352,129,325,116,273,118,250,130,224,153,198,182,181"/>
+<area shape="poly" id="edge12_Node000008_Node000003" title=" " alt="" coords="333,117,337,147,336,163,330,179,319,195,305,208,274,228,271,223,302,204,315,191,326,176,330,162,332,147,327,118"/>
+<area shape="poly" id="edge14_Node000008_Node000005" title=" " alt="" coords="338,115,358,158,376,213,380,242,380,272,373,300,359,326,335,349,306,366,274,377,242,383,241,378,273,371,304,361,332,345,355,322,368,298,374,271,375,243,371,214,353,160,333,118"/>
+<area shape="poly" id="edge13_Node000008_Node000007" title=" " alt="" coords="299,115,251,154,247,150,295,110"/>
+</map>

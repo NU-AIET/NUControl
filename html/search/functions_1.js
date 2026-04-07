@@ -1,0 +1,8 @@
+var searchData=
+[
+  ['begin_5fdma_0',['begin_dma',['../classSPIEncoder.html#a2485726845784259d4fa9a88e6bf21a9',1,'SPIEncoder']]],
+  ['brusheddriver_1',['brusheddriver',['../classBrushedDriver.html#aeff317feef1b9742a0c7b674f6fe8c08',1,'BrushedDriver::BrushedDriver()=default'],['../classBrushedDriver.html#a0021b1c8de46f7141ae57e8d95b03188',1,'BrushedDriver::BrushedDriver(const std::pair&lt; int, int &gt; pins, int enable, float PWM_freq=200000.f, int PWM_res=8, float driver_volts=24.f, float max_voltage=24.f)']]],
+  ['brushlesscontroller_2',['brushlesscontroller',['../classBrushlessController.html#ab577a5c25d19e9030d612ffcd6961d05',1,'BrushlessController::BrushlessController()=default'],['../classBrushlessController.html#a0b3176a9d12a4b75345f50353e821c88',1,'BrushlessController::BrushlessController(MotorParameters motor, BrushlessDriver &amp;motor_driver, InlineCurrentSensorPackage &amp;current_sensors, AbsoluteEncoder &amp;pos_sensor)']]],
+  ['brushlessdriver_3',['brushlessdriver',['../classBrushlessDriver.html#a36eb106248f8588c696d16114670249d',1,'BrushlessDriver::BrushlessDriver()=default'],['../classBrushlessDriver.html#ad3d63deb8b254aa0e93460f77803937f',1,'BrushlessDriver::BrushlessDriver(const PhaseValues&lt; int &gt; pins, int enable, float PWM_freq=20000.f, int PWM_res=8, float driver_volts=24.f, float max_voltage=24.f)']]],
+  ['butterworth2nd_4',['butterworth2nd',['../classButterworth2nd.html#acf62cf16a3fb55f79ffa6f8d98da7928',1,'Butterworth2nd::Butterworth2nd()=default'],['../classButterworth2nd.html#a7057a1e421a7cef8f70bcc67809eb153',1,'Butterworth2nd::Butterworth2nd(float cutoff_hz, float sampling_hz)']]]
+];

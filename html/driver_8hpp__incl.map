@@ -1,0 +1,18 @@
+<map id="src/driver.hpp" name="src/driver.hpp">
+<area shape="rect" id="Node000001" title="Three&#45;phase and two&#45;phase motor gate driver wrappers." alt="" coords="143,5,253,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="157,152,241,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="201,31,202,138,196,138,195,31"/>
+<area shape="rect" id="Node000003" href="$transformations_8hpp.html" title="Coordinate&#45;frame structs and Clarke/Park transform functions for FOC." alt="" coords="6,79,161,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="181,33,115,74,112,69,178,28"/>
+<area shape="rect" id="Node000007" href="$pwm__hal_8hpp.html" title="iMXRT1062 FlexPWM hardware abstraction layer for center&#45;aligned PWM." alt="" coords="235,79,345,104"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="214,29,266,68,263,72,211,33"/>
+<area shape="rect" id="Node000004" href="$helpers_8hpp.html" title="Math utility constants and functions for FOC computations." alt="" coords="34,152,133,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="86,104,86,138,81,138,81,104"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,225,73,251"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="78,179,56,215,51,212,74,176"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="97,225,157,251"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="93,176,115,212,111,215,88,179"/>
+<area shape="poly" id="edge7_Node000007_Node000002" title=" " alt="" coords="277,106,227,145,223,141,274,102"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="266,152,335,177"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="294,104,300,138,294,139,289,105"/>
+</map>

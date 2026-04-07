@@ -9,8 +9,7 @@
  * ## kT / kV relationship
  * For a sinusoidal BLDC motor in the amplitude-invariant Park frame:
  * @f[ k_T \approx \frac{1}{k_V \cdot \sqrt{3/2}} @f]
- * The U2523/U2535 entries have an unusually small `kV` (0.001 V·s/rad), which
- * may require scaling by 0.5 — see the `@todo` note on `EC45_Flat`.
+ * The U2523/U2535 entries have an unusually small `kV` (0.001 V·s/rad)
  */
 
 #ifndef MOTORS_HPP
@@ -71,10 +70,6 @@ struct MotorParameters
  * @note `kV = 0.0369 V·s/rad` matches the manufacturer datasheet.
  *       The commented-out `kV = 0` variant disables back-EMF compensation.
  *
- * @todo Verify whether `kV` should be multiplied by 0.5 for the amplitude-invariant
- *       Park-frame convention used by this controller. Forum discussions suggest the
- *       scaling factor depends on the chosen normalisation; the back-EMF decoupler
- *       already uses `0.5 * kV * ω`, which may or may not be correct for this motor.
  */
 MotorParameters EC45_Flat{8, 0.2992f, 111.f * 1e-6f, 3.f, 8.f, 0.034f, 0.0369};
 // MotorParameters EC45_Flat{8, 0.2992f, 0.f, 3.f, 8.f, 0.034f, 0.0369};
@@ -82,8 +77,7 @@ MotorParameters EC45_Flat{8, 0.2992f, 111.f * 1e-6f, 3.f, 8.f, 0.034f, 0.0369};
 /**
  * @brief T-Motor U2535 BLDC motor parameters.
  *
- * @details Used for the proximal joint of the NUControl exoskeleton.
- * High inductance (510 µH) results in relatively slow electrical dynamics
+ * @details High inductance (510 µH) results in relatively slow electrical dynamics
  * (RL time constant τ = L/R ≈ 700 µs ≈ 7 control steps at 10 kHz).
  *
  * @note `kV = 0.001 V·s/rad` is very small; the back-EMF contribution is
