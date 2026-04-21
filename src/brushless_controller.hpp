@@ -88,11 +88,14 @@ public:
 
     set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_current_, filter_cutoff_freq_hz_fb_);
 
-    update_sensors();
+    encoder_angle.update_angle(position_sensor_.read());
+    float raw_angle = pos_sensor_dir_ * encoder_angle.get_full_angle();
 
-    pos_filter_.reset(shaft_angle_);
-    vel_filter_.reset(shaft_angle_);
+    pos_filter_.reset(raw_angle);
+    vel_filter_.reset(raw_angle);
     vel_filter_cutoff_.reset();
+
+    update_sensors();
 
     shaft_velocity_ = 0.f;
 
@@ -240,7 +243,7 @@ public:
         delay(1);
     }
     stop_control();
-    shaft_velocity_ = 0;
+    shaft_velocity_ = 0.f;
     update_sensors();
     stop_control();
     e_ang_offset_ = normalize_angle(offset_sum / samples);
@@ -323,6 +326,8 @@ public:
 
   void set_target(float target){ target_ = target; }
 
+  float get_target() const { return target_; }
+
 
   PhaseValues<float> get_last_phasevolts() const { return last_phase_volts_; }
 
@@ -331,7 +336,14 @@ public:
     encoder_angle.update_angle(position_sensor_.read());
     shaft_angle_ = pos_filter_.update(pos_sensor_dir_ * encoder_angle.get_full_angle());
     electrical_angle_ = get_eangle(shaft_angle_);
-    // shazft_velocity_ = vel_filter_cutoff_.update(vel_filter_.update(shaft_angle_));
+    auto raw_vel = vel_filter_.update(shaft_angle_);
+    shaft_velocity_ = vel_filter_cutoff_.update(raw_vel);
+    // Serial.print("Raw Vel: ");
+    // Serial.print(raw_vel);
+    // Serial.print("\tFiltered Vel: ");
+    // Serial.print(shaft_velocity_);
+    // Serial.print("\tShaft Angle: ");
+    // Serial.println(shaft_angle_);
     phase_currents_ = cs_.get_phase_currents(true);
     quaddirect_currents_ = phases_to_quaddirect<float>(phase_currents_, electrical_angle_);
   }

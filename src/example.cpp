@@ -113,12 +113,27 @@ std::array<float, 10> targets_{0.f, 0.6f, 1.2f, 1.8f, 2.4f, 3.0f, 3.6f, 4.2f, 4.
 float kp = 0.1f;
 
 void update(){
-  const auto MAX_VEL = 10.f; // rad/s
+  const auto MAX_VEL = 240.f; // 200 rps
+
+  // static size_t startup_ticks = 0;
+  // startup_ticks++;
+  // if (startup_ticks > 100) { return; }
 
   controller_1.update_sensors();
 
+  // print shaft velocity at 1Hz for debugging
+  if(cntr % 10000 == 0){
+    Serial.print("Shaft Angle: ");
+    Serial.print(controller_1.get_shaft_angle());
+    Serial.print("\tShaft Velocity: ");
+    Serial.print(controller_1.get_shaft_velocity());
+    Serial.print("\tT Setpoint: ");
+    Serial.println(controller_1.get_target());
+  }
+
   // overspeed governor for safety
   if (fabs(controller_1.get_shaft_velocity()) > MAX_VEL) {
+    Serial.println("Overspeed! Stopping motor. (vel=" + String(controller_1.get_shaft_velocity()) + ")");
     controller_1.set_target(0.f);
   }
   controller_1.update_control();
@@ -139,7 +154,7 @@ void update(){
   //     idx = 0;
   //   }
   // }
-  // cntr++;
+  cntr++;
 
 }
 
@@ -150,7 +165,7 @@ void setup()
   TeensyTimerTool::attachErrFunc(timer_errors);
   analogReadAveraging(1);
 
-  Serial.println("Hell yeah!");
+  Serial.println("Hello World!");
 
   // if (!controller_.init_components()) {
   //   Serial.println("Motor controller component failed to init");
@@ -224,7 +239,7 @@ void setup()
 
   controller_1.set_control_mode(ControllerMode::TORQUE);
   controller_1.set_position_filter({{0.25f, 0.25f, 0.25f, 0.25f}, {}});
-  controller_1.set_velocity_filter(vel_filter_200_);
+  // controller_1.set_velocity_filter(vel_filter_200_);
   controller_1.set_target(0.03f);
   controller_1.set_feedback_state(true);
   controller_1.set_back_emf_comp_state(false);
