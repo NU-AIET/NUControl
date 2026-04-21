@@ -111,13 +111,10 @@ size_t idx = 0;
 size_t cntr = 0;
 std::array<float, 10> targets_{0.f, 0.6f, 1.2f, 1.8f, 2.4f, 3.0f, 3.6f, 4.2f, 4.8f, 5.4f};
 float kp = 0.1f;
+float kd = -0.003f;
 
 void update(){
   const auto MAX_VEL = 240.f; // 200 rps
-
-  // static size_t startup_ticks = 0;
-  // startup_ticks++;
-  // if (startup_ticks > 100) { return; }
 
   controller_1.update_sensors();
 
@@ -138,22 +135,19 @@ void update(){
   }
   controller_1.update_control();
 
-  // controller_2.update_sensors();
-  // controller_2.update_control();
-  // controller_3.update_sensors();
-  // controller_3.update_control();
-  // auto torque = kp * normalize_angle(targets_[idx] - controller_1.get_shaft_angle());
-  // torque = std::clamp(torque, -0.3f, 0.3f);
+  auto vel_error = controller_1.get_shaft_velocity() - 0.f;
+  auto torque = kp * normalize_angle(targets_[idx] - controller_1.get_shaft_angle()) + kd * vel_error;
+  torque = std::clamp(torque, -0.3f, 0.3f);
 
-  // controller_1.set_target(torque);
-  // controller_1.update_control();
-  // if(cntr >= 10000){
-  //   idx++;
-  //   cntr = 0;
-  //   if(idx == 10) {
-  //     idx = 0;
-  //   }
-  // }
+  controller_1.set_target(torque);
+  controller_1.update_control();
+  if(cntr >= 10000){
+    idx++;
+    cntr = 0;
+    if(idx == 10) {
+      idx = 0;
+    }
+  }
   cntr++;
 
 }
