@@ -1,6 +1,6 @@
-// Sweeps a single brushless motor (EC45_Flat) through 10 evenly-spaced angular
-// targets (0 – 5.4 rad) in a back-and-forth pattern using PD torque control.
-// Prints the active target to Serial each time it advances (~1 s per step).
+// Applies a constant torque to a BLDC motor (EC45_Flat) until it exceeds 200 rps,
+// then stops the motor.
+// Prints the current angular velocity + position from the encoder at 10 Hz for debugging.
 
 #include <Arduino.h>
 #include <TeensyTimerTool.h>
@@ -32,32 +32,30 @@ size_t cntr = 0;
 std::array<float, 10> targets_{0.f, 0.6f, 1.2f, 1.8f, 2.4f, 3.0f, 3.6f, 4.2f, 4.8f, 5.4f};
 float kp = 0.1f;
 float kd = -0.003f;
-static int direction = 1;
 
 void update(){
+  const auto MAX_VEL = 240.f; // 200 rps
+
   controller_1.update_sensors();
 
-  auto vel_error = controller_1.get_shaft_velocity() - 0.f;
-  auto torque = kp * normalize_angle(targets_[idx] - controller_1.get_shaft_angle()) + kd * vel_error;
-  torque = std::clamp(torque, -0.3f, 0.3f);
-
-  controller_1.set_target(torque);
-  controller_1.update_control();
-  if(cntr >= 10000){
-    idx += direction;
-    cntr = 0;
-    if(idx == 10) {
-      direction = -1;
-      idx = 8;
-    }
-    if (idx == -1) {
-      direction = 1;
-      idx = 1;
-    }
-    Serial.println("Angular position target: " + String(targets_[idx]) + " rad");
+  // print shaft velocity at 1Hz for debugging
+  if(cntr % 10000 == 0){
+    Serial.print("Shaft Angle: ");
+    Serial.print(controller_1.get_shaft_angle());
+    Serial.print("\tShaft Velocity: ");
+    Serial.print(controller_1.get_shaft_velocity());
+    Serial.print("\tT Setpoint: ");
+    Serial.println(controller_1.get_target());
   }
-  cntr++;
 
+  // overspeed governor for safety
+  if (fabs(controller_1.get_shaft_velocity()) > MAX_VEL) {
+    Serial.println("Overspeed! Stopping motor. (vel=" + String(controller_1.get_shaft_velocity()) + ")");
+    controller_1.set_target(0.f);
+  }
+  controller_1.update_control();
+
+  cntr++;
 }
 
 void setup()
@@ -82,6 +80,7 @@ void setup()
   }
 
   Serial.println("Preparing to run");
+  // controller_2.print_calibration();
   delay(1000);
 
   controller_1.set_control_mode(ControllerMode::TORQUE);
