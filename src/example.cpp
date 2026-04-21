@@ -9,8 +9,12 @@ TeensyTimerTool::PeriodicTimer timer_(TeensyTimerTool::TCK);
 constexpr float CURR_GAIN = 5.f; // Amps / Volt
 constexpr int ADC_RES = 10;
 
+// pins 14 & 15 on the teensy are connected to the ADC for current sensing
 InlineCurrentSensor Current_Phase_0{A0, CURR_GAIN, ADC_RES};
 InlineCurrentSensor Current_Phase_1{A1, CURR_GAIN, ADC_RES};
+InlineCurrentSensorPackage Current_Sensors1{{&Current_Phase_0, &Current_Phase_1}};
+
+// unnecessary for my demo hardware.
 InlineCurrentSensor Current_Phase_2{A2, CURR_GAIN, ADC_RES};
 InlineCurrentSensor Current_Phase_3{A3, CURR_GAIN, ADC_RES};
 InlineCurrentSensor Current_Phase_4{A4, CURR_GAIN, ADC_RES};
@@ -19,7 +23,6 @@ InlineCurrentSensor Current_Phase_6{A6, CURR_GAIN, ADC_RES};
 InlineCurrentSensor Current_Phase_7{A7, CURR_GAIN, ADC_RES};
 InlineCurrentSensor Current_Phase_8{A9, CURR_GAIN, ADC_RES};
 InlineCurrentSensor Current_Phase_9{A8, CURR_GAIN, ADC_RES};
-InlineCurrentSensorPackage Current_Sensors1{{&Current_Phase_0, &Current_Phase_1}};
 InlineCurrentSensorPackage Current_Sensors2{{&Current_Phase_4, &Current_Phase_5}};
 InlineCurrentSensorPackage Current_Sensors3{{&Current_Phase_2, &Current_Phase_3}};
 
@@ -110,8 +113,16 @@ std::array<float, 10> targets_{0.f, 0.6f, 1.2f, 1.8f, 2.4f, 3.0f, 3.6f, 4.2f, 4.
 float kp = 0.1f;
 
 void update(){
+  const auto MAX_VEL = 10.f; // rad/s
+
   controller_1.update_sensors();
+
+  // overspeed governor for safety
+  if (fabs(controller_1.get_shaft_velocity()) > MAX_VEL) {
+    controller_1.set_target(0.f);
+  }
   controller_1.update_control();
+
   // controller_2.update_sensors();
   // controller_2.update_control();
   // controller_3.update_sensors();
