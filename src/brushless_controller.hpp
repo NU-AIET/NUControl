@@ -338,12 +338,6 @@ public:
     electrical_angle_ = get_eangle(shaft_angle_);
     auto raw_vel = vel_filter_.update(shaft_angle_);
     shaft_velocity_ = vel_filter_cutoff_.update(raw_vel);
-    // Serial.print("Raw Vel: ");
-    // Serial.print(raw_vel);
-    // Serial.print("\tFiltered Vel: ");
-    // Serial.print(shaft_velocity_);
-    // Serial.print("\tShaft Angle: ");
-    // Serial.println(shaft_angle_);
     phase_currents_ = cs_.get_phase_currents(true);
     quaddirect_currents_ = phases_to_quaddirect<float>(phase_currents_, electrical_angle_);
   }
