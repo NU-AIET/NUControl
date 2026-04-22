@@ -27,25 +27,14 @@ struct MotorTelemetry
 
   void serialize(Stream & stream) const
   {
-    stream.print(F("{\"t\":"));
-    stream.print(t_us);
-    stream.print(F(",\"pos\":"));
-    stream.print(pos, 4);
-    stream.print(F(",\"vel\":"));
-    stream.print(vel, 4);
-    stream.print(F(",\"target\":"));
-    stream.print(target, 4);
-    stream.print(F(",\"ia\":"));
-    stream.print(phase_currents.a, 4);
-    stream.print(F(",\"ib\":"));
-    stream.print(phase_currents.b, 4);
-    stream.print(F(",\"ic\":"));
-    stream.print(phase_currents.c, 4);
-    stream.print(F(",\"iq\":"));
-    stream.print(qd_currents.q, 4);
-    stream.print(F(",\"id\":"));
-    stream.print(qd_currents.d, 4);
-    stream.println(F("}"));
+    char buf[192];
+    snprintf(buf, sizeof(buf),
+      "{\"t\":%lu,\"pos\":%.4f,\"vel\":%.4f,\"target\":%.4f"
+      ",\"ia\":%.4f,\"ib\":%.4f,\"ic\":%.4f,\"iq\":%.4f,\"id\":%.4f}\n",
+      (unsigned long)t_us, pos, vel, target,
+      phase_currents.a, phase_currents.b, phase_currents.c,
+      qd_currents.q, qd_currents.d);
+    stream.print(buf);
   }
 };
 

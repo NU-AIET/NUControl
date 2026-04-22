@@ -1,41 +1,48 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <root>
- <tabbed_widget name="Main Window" parent="main_window">
+ <tabbed_widget parent="main_window" name="Main Window">
   <Tab containers="1" tab_name="I_phase (A)">
    <Container>
-    <DockSplitter sizes="1" orientation="-" count="1">
-     <DockSplitter sizes="0.500391;0.499609" orientation="|" count="2">
-      <DockSplitter sizes="0.333697;0.332606;0.333697" orientation="-" count="3">
+    <DockSplitter count="1" sizes="1" orientation="-">
+     <DockSplitter count="2" sizes="0.5;0.5" orientation="|">
+      <DockSplitter count="4" sizes="0.25;0.25;0.25;0.25" orientation="-">
        <DockArea name="...">
-        <plot flip_y="false" flip_x="false" line_width="1.0" mode="TimeSeries">
-         <range bottom="-0.284885" top="0.273085" left="119.239290" right="149.233805"/>
+        <plot line_width="1.0" flip_y="false" flip_x="false" mode="TimeSeries">
+         <range left="6.788029" bottom="-1.418010" top="1.362810" right="12.787071"/>
          <limitY/>
-         <curve name="/ia" color="#1f77b4"/>
-         <curve name="/ib" color="#d62728"/>
-         <curve name="/ic" color="#1ac938"/>
+         <curve color="#1f77b4" name="/ia"/>
+         <curve color="#d62728" name="/ib"/>
+         <curve color="#1ac938" name="/ic"/>
         </plot>
        </DockArea>
        <DockArea name="...">
-        <plot flip_y="false" flip_x="false" line_width="1.0" mode="TimeSeries">
-         <range bottom="-0.283780" top="0.252980" left="119.239290" right="149.233805"/>
+        <plot line_width="1.0" flip_y="false" flip_x="false" mode="TimeSeries">
+         <range left="6.788029" bottom="-1.420265" top="1.501465" right="12.787071"/>
          <limitY/>
-         <curve name="/id" color="#ff7f0e"/>
-         <curve name="/iq" color="#f14cc1"/>
+         <curve color="#ff7f0e" name="/id"/>
+         <curve color="#f14cc1" name="/iq"/>
         </plot>
        </DockArea>
        <DockArea name="...">
-        <plot flip_y="false" flip_x="false" line_width="1.0" mode="TimeSeries">
-         <range bottom="-0.270615" top="0.313815" left="119.239290" right="149.233805"/>
+        <plot line_width="1.0" flip_y="false" flip_x="false" mode="TimeSeries">
+         <range left="6.788029" bottom="-14.486343" top="14.852443" right="12.787071"/>
          <limitY/>
-         <curve name="/vel" color="#9467bd"/>
+         <curve color="#9467bd" name="/vel"/>
+        </plot>
+       </DockArea>
+       <DockArea name="...">
+        <plot line_width="1.0" flip_y="false" flip_x="false" mode="TimeSeries">
+         <range left="6.788029" bottom="2.928943" top="5.447158" right="12.787071"/>
+         <limitY/>
+         <curve color="#17becf" name="/pos"/>
         </plot>
        </DockArea>
       </DockSplitter>
       <DockArea name="...">
-       <plot flip_y="false" flip_x="false" line_width="1.0" mode="TimeSeries">
-        <range bottom="-0.100000" top="0.100000" left="119.239290" right="149.233805"/>
+       <plot line_width="1.0" flip_y="false" flip_x="false" mode="TimeSeries">
+        <range left="6.788029" bottom="-0.066827" top="0.068727" right="12.787071"/>
         <limitY/>
-        <curve name="/target" color="#17becf"/>
+        <curve color="#bcbd22" name="/target"/>
        </plot>
       </DockArea>
      </DockSplitter>
@@ -53,17 +60,17 @@
   </plugin>
   <plugin ID="DataLoad MCAP"/>
   <plugin ID="DataLoad Parquet">
-   <default dateFromat="yyyy-MM-dd hh:mm:ss" radioIndexChecked="0" parseDateTime="0" prevTimestamp=""/>
+   <default dateFromat="yyyy-MM-dd hh:mm:ss" prevTimestamp="" parseDateTime="0" radioIndexChecked="0"/>
   </plugin>
   <plugin ID="DataLoad ULog"/>
   <plugin ID="Foxglove ROS2 Bridge">
-   <foxglove_client port="8765" clamp_large_arrays="0" max_array_size="500" address="127.0.0.1" use_timestamp="0">
+   <foxglove_client max_array_size="500" clamp_large_arrays="0" use_timestamp="0" port="8765" address="127.0.0.1">
     <topics/>
    </foxglove_client>
   </plugin>
   <plugin ID="MQTT Subscriber (Mosquitto)"/>
   <plugin ID="PlotJuggler ROS2 Bridge">
-   <websocket_client port="9090" clamp_large_arrays="0" max_array_size="500" address="127.0.0.1" use_timestamp="0">
+   <websocket_client max_array_size="500" clamp_large_arrays="0" use_timestamp="0" port="9090" address="127.0.0.1">
     <topics/>
    </websocket_client>
   </plugin>
