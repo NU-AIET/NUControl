@@ -7,6 +7,7 @@
 #include <vector>
 #include <math.h>
 #include "nu_control.hpp"
+#include "telemetry.hpp"
 
 TeensyTimerTool::PeriodicTimer timer_(TeensyTimerTool::TCK);
 
@@ -34,6 +35,12 @@ float kp = 0.1f;
 float kd = -0.003f;
 static int direction = 1;
 
+MotorTelemetry telemetry;
+
+// Publish telemetry at 1kHz (every 10 ticks of the 10kHz loop) on SerialUSB1.
+// Open SerialUSB1 in PlotJuggler (serial port, JSON Lines parser) to view live plots.
+constexpr size_t TELEM_PERIOD_TICKS = 10;
+
 void update(){
   controller_1.update_sensors();
 
@@ -58,6 +65,10 @@ void update(){
   }
   cntr++;
 
+  if (cntr % TELEM_PERIOD_TICKS == 0) {
+    telemetry.populate(controller_1);
+    telemetry.serialize(SerialUSB1);
+  }
 }
 
 void setup()
