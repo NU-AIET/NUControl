@@ -81,17 +81,21 @@ There are two demo environments configured in `platformio.ini`:
 
 ### 1. Position Sweep Demo (`position_sweep.cpp`)
 
+https://github.com/user-attachments/assets/27d9cb95-7390-43a7-b38a-2bc345d98a3b
+
 **What it does:** Sweeps the motor through 10 evenly-spaced angular targets (0–5.4 rad) in a back-and-forth pattern using PD torque control. Target advances approximately every 1 second.
 
 **To run:**
 1. Set the active environment to `position_sweep` in PlatformIO
 2. Build and upload: `Ctrl+Alt+B`, then `Ctrl+Alt+U`
 3. Open the Serial monitor at 115200 baud (`Ctrl+Shift+S`)
-4. Motor will calibrate, then you should see messages like: `"Angular position target: X.X rad"`
+4. Motor will calibrate, then you should see messages like: `"Angular position target: X.X rad"`, and motor will sweep back and forth across the 10 target positions.
 
 **Expected behavior:** Motor smoothly moves between positions without overshooting significantly.
 
 ### 2. One-Shot Demo (`one_shot.cpp`)
+
+https://github.com/user-attachments/assets/84293020-8c51-4c20-a827-f513a655a712
 
 **What it does:** Applies constant torque to the motor until it exceeds a velocity threshold (240 RPS), then stops. Includes an overspeed governor for safety.
 
