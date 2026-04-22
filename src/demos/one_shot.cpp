@@ -7,7 +7,9 @@
 #include <vector>
 #include <math.h>
 #include "nu_control.hpp"
+#ifdef NU_TELEMETRY
 #include "telemetry.hpp"
+#endif
 
 TeensyTimerTool::PeriodicTimer timer_(TeensyTimerTool::TCK);
 
@@ -29,21 +31,22 @@ BrushlessDriver GateDriver1{{3, 4, 5}, 2, PWM_FREQ, PWM_RES, DRIVER_VOLTAGE};
 BrushlessController controller_1{EC45_Flat, GateDriver1, Current_Sensors1, Encoder1}; // DISTAL
 
 size_t cntr = 0;
+#ifdef NU_TELEMETRY
 MotorTelemetry telemetry;
-
-// Publish telemetry at 1kHz (every 10 ticks of the 10kHz loop) on SerialUSB1.
-// Open SerialUSB1 in PlotJuggler (serial port, JSON Lines parser) to view live plots.
 constexpr size_t TELEM_PERIOD_TICKS = 10;
+#endif
 
 void update(){
   const auto MAX_VEL = 160.f; // rad/s
 
   controller_1.update_sensors();
 
+#ifdef NU_TELEMETRY
   if (cntr % TELEM_PERIOD_TICKS == 0) {
     telemetry.populate(controller_1);
     telemetry.serialize(SerialUSB1);
   }
+#endif
 
   // print shaft velocity at 1Hz for debugging
   if(cntr % 10000 == 0){
@@ -68,7 +71,9 @@ void update(){
 void setup()
 {
   while (!Serial) {}
+#ifdef NU_TELEMETRY
   SerialUSB1.begin(0); // baud ignored for USB CDC; 0 = default
+#endif
 
   TeensyTimerTool::attachErrFunc(timer_errors);
   analogReadAveraging(1);
