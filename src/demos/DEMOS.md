@@ -14,7 +14,11 @@ Below are instructions for setting up the hardware and software to run the NUCon
 
 ## Hardware Setup
 
+*TODO - make a full wiring diagram for this.*
+
 ### Microcontroller & Driver Connections
+
+![Teensy Pinout](/imgs/teensy_pinout.jpg)
 
 **Teensy 4.0 Pin Configuration:**
 - **Phase PWM pins**: Digital pins 3, 4, 5 (phases A, B, C respectively)
@@ -23,8 +27,6 @@ Below are instructions for setting up the hardware and software to run the NUCon
 - **Current sense pins**: A0, A1 (ADC inputs for two of three phases)
 
 ### Encoder Board Wiring
-
-*TODO - make a wiring diagram for this.*
 
 Connect the AS5047P encoder board to the Teensy:
 - **Power**: 3.3V from Teensy to encoder board 3V input (Note: the 3V Teensy output is connected to the encoder board's 5V input—this is what works in testing)
