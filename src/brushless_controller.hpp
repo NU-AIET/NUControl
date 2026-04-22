@@ -330,6 +330,8 @@ public:
 
 
   PhaseValues<float> get_last_phasevolts() const { return last_phase_volts_; }
+  PhaseValues<float> get_phase_currents() const { return phase_currents_; }
+  QuadDirectValues<float> get_quaddirect_currents() const { return quaddirect_currents_; }
 
   void update_sensors()
   {
