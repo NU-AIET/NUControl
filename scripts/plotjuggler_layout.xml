@@ -3,12 +3,12 @@
  <tabbed_widget name="Main Window" parent="main_window">
   <Tab containers="1" tab_name="I_phase (A)">
    <Container>
-    <DockSplitter orientation="-" count="1" sizes="1">
-     <DockSplitter orientation="|" count="2" sizes="0.730258;0.269742">
-      <DockSplitter orientation="-" count="3" sizes="0.333697;0.332606;0.333697">
+    <DockSplitter sizes="1" orientation="-" count="1">
+     <DockSplitter sizes="0.500391;0.499609" orientation="|" count="2">
+      <DockSplitter sizes="0.333697;0.332606;0.333697" orientation="-" count="3">
        <DockArea name="...">
-        <plot mode="TimeSeries" flip_y="false" flip_x="false" line_width="1.0">
-         <range right="57.902568" left="52.931093" top="0.244002" bottom="-0.251702"/>
+        <plot flip_y="false" flip_x="false" line_width="1.0" mode="TimeSeries">
+         <range bottom="-0.284885" top="0.273085" left="119.239290" right="149.233805"/>
          <limitY/>
          <curve name="/ia" color="#1f77b4"/>
          <curve name="/ib" color="#d62728"/>
@@ -16,24 +16,24 @@
         </plot>
        </DockArea>
        <DockArea name="...">
-        <plot mode="TimeSeries" flip_y="false" flip_x="false" line_width="1.0">
-         <range right="57.902568" left="52.931093" top="0.217988" bottom="-0.218287"/>
+        <plot flip_y="false" flip_x="false" line_width="1.0" mode="TimeSeries">
+         <range bottom="-0.283780" top="0.252980" left="119.239290" right="149.233805"/>
          <limitY/>
-         <curve name="/id" color="#f14cc1"/>
-         <curve name="/iq" color="#9467bd"/>
+         <curve name="/id" color="#ff7f0e"/>
+         <curve name="/iq" color="#f14cc1"/>
         </plot>
        </DockArea>
        <DockArea name="...">
-        <plot mode="TimeSeries" flip_y="false" flip_x="false" line_width="1.0">
-         <range right="57.902568" left="52.931093" top="0.304030" bottom="-0.318830"/>
+        <plot flip_y="false" flip_x="false" line_width="1.0" mode="TimeSeries">
+         <range bottom="-0.270615" top="0.313815" left="119.239290" right="149.233805"/>
          <limitY/>
-         <curve name="/vel" color="#ff7f0e"/>
+         <curve name="/vel" color="#9467bd"/>
         </plot>
        </DockArea>
       </DockSplitter>
       <DockArea name="...">
-       <plot mode="TimeSeries" flip_y="false" flip_x="false" line_width="1.0">
-        <range right="57.902568" left="52.931093" top="0.100000" bottom="-0.100000"/>
+       <plot flip_y="false" flip_x="false" line_width="1.0" mode="TimeSeries">
+        <range bottom="-0.100000" top="0.100000" left="119.239290" right="149.233805"/>
         <limitY/>
         <curve name="/target" color="#17becf"/>
        </plot>
@@ -49,29 +49,26 @@
  <!-- - - - - - - - - - - - - - - -->
  <Plugins>
   <plugin ID="DataLoad CSV">
-   <parameters time_axis="" delimiter="0"/>
+   <parameters delimiter="0" time_axis=""/>
   </plugin>
   <plugin ID="DataLoad MCAP"/>
-  <plugin ID="DataLoad ROS2 bags">
-   <use_header_stamp value="false"/>
-   <discard_large_arrays value="true"/>
-   <max_array_size value="100"/>
-   <boolean_strings_to_number value="true"/>
-   <remove_suffix_from_strings value="true"/>
-   <selected_topics value=""/>
+  <plugin ID="DataLoad Parquet">
+   <default dateFromat="yyyy-MM-dd hh:mm:ss" radioIndexChecked="0" parseDateTime="0" prevTimestamp=""/>
   </plugin>
   <plugin ID="DataLoad ULog"/>
-  <plugin ID="ROS2 Topic Subscriber">
-   <use_header_stamp value="false"/>
-   <discard_large_arrays value="true"/>
-   <max_array_size value="100"/>
-   <boolean_strings_to_number value="true"/>
-   <remove_suffix_from_strings value="true"/>
-   <selected_topics value=""/>
+  <plugin ID="Foxglove ROS2 Bridge">
+   <foxglove_client port="8765" clamp_large_arrays="0" max_array_size="500" address="127.0.0.1" use_timestamp="0">
+    <topics/>
+   </foxglove_client>
+  </plugin>
+  <plugin ID="MQTT Subscriber (Mosquitto)"/>
+  <plugin ID="PlotJuggler ROS2 Bridge">
+   <websocket_client port="9090" clamp_large_arrays="0" max_array_size="500" address="127.0.0.1" use_timestamp="0">
+    <topics/>
+   </websocket_client>
   </plugin>
   <plugin ID="UDP Server"/>
   <plugin ID="WebSocket Server"/>
-  <plugin ID="ZMQ Subscriber"/>
   <plugin ID="Fast Fourier Transform"/>
   <plugin ID="Quaternion to RPY"/>
   <plugin ID="Reactive Script Editor">
@@ -79,7 +76,6 @@
    <scripts/>
   </plugin>
   <plugin ID="CSV Exporter"/>
-  <plugin ID="ROS2 Topic Re-Publisher"/>
  </Plugins>
  <!-- - - - - - - - - - - - - - - -->
  <previouslyLoaded_Datafiles/>
@@ -87,6 +83,7 @@
  <!-- - - - - - - - - - - - - - - -->
  <customMathEquations/>
  <snippets/>
+ <colorMaps/>
  <!-- - - - - - - - - - - - - - - -->
 </root>
 
