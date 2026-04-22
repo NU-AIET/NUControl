@@ -79,8 +79,7 @@ void setup()
     exit(0);
   }
 
-  Serial.println("Preparing to run");
-  // controller_2.print_calibration();
+  Serial.println("RUNNING ONE_SHOT DEMO");
   delay(1000);
 
   controller_1.set_control_mode(ControllerMode::TORQUE);

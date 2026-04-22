@@ -81,7 +81,7 @@ void setup()
     exit(0);
   }
 
-  Serial.println("Preparing to run");
+  Serial.println("RUNNING POSITION SWEEP DEMO");
   delay(1000);
 
   controller_1.set_control_mode(ControllerMode::TORQUE);
