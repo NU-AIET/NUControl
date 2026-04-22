@@ -1,6 +1,6 @@
-// Applies a constant torque to a BLDC motor (EC45_Flat) until it exceeds 200 rps,
+// Applies a constant torque to a BLDC motor (EC45_Flat) until it exceeds MAX_VEL rad/s
 // then stops the motor.
-// Prints the current angular velocity + position from the encoder at 10 Hz for debugging.
+// Prints the current angular velocity + position from the encoder at 1 Hz for debugging.
 
 #include <Arduino.h>
 #include <TeensyTimerTool.h>
@@ -27,14 +27,10 @@ SPIEncoder Encoder1{EncoderReadCmd, SPI, 10};
 BrushlessDriver GateDriver1{{3, 4, 5}, 2, PWM_FREQ, PWM_RES, DRIVER_VOLTAGE};
 BrushlessController controller_1{EC45_Flat, GateDriver1, Current_Sensors1, Encoder1}; // DISTAL
 
-int idx = 0;
 size_t cntr = 0;
-std::array<float, 10> targets_{0.f, 0.6f, 1.2f, 1.8f, 2.4f, 3.0f, 3.6f, 4.2f, 4.8f, 5.4f};
-float kp = 0.1f;
-float kd = -0.003f;
 
 void update(){
-  const auto MAX_VEL = 160.f; // 200 rps
+  const auto MAX_VEL = 160.f; // rad/s
 
   controller_1.update_sensors();
 

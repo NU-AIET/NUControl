@@ -99,7 +99,7 @@ https://github.com/user-attachments/assets/27d9cb95-7390-43a7-b38a-2bc345d98a3b
 
 https://github.com/user-attachments/assets/84293020-8c51-4c20-a827-f513a655a712
 
-**What it does:** Applies constant torque to the motor until it exceeds a velocity threshold (240 RPS), then stops. Includes an overspeed governor for safety.
+**What it does:** Applies constant torque to the motor until it exceeds a velocity threshold (160 rad/s), then stops. Includes an overspeed governor for safety.
 
 **To run:**
 1. Set the active environment to `one_shot` in PlatformIO
@@ -109,7 +109,7 @@ https://github.com/user-attachments/assets/84293020-8c51-4c20-a827-f513a655a712
 
 **Known issues & debugging:**
 - **Current sensor saturation**: The sensor may read near its maximum under high acceleration. Monitor the serial output for "Current Sensor Saturated!" warnings
-- **Instability at high speeds**: Setting the PSU to (24V, 2.5A) and `MAX_VEL` to 300 RPS will trigger the instability; motor may fail to shut down cleanly and draw excessive current. This can be reproduced using the one_shot demo
+- **Instability at high speeds**: Setting the PSU to (24V, 2.5A) and `MAX_VEL` to 300 rad/s will trigger the instability; motor may fail to shut down cleanly and draw excessive current. This can be reproduced using the one_shot demo
 - **Velocity sensing**: Ensure the encoder is reading correctly (check `get_shaft_velocity()` output). If velocity reads zero, verify encoder wiring and SPI communication
 
 ### Power Supply Checklist
@@ -133,7 +133,7 @@ Angular position target: 0.6 rad
 ```
 Shaft Angle: X.XX    Shaft Velocity: Y.YY    T Setpoint: Z.ZZ
 [Repeats at 1 Hz]
-Overspeed! Stopping motor. (vel=240.0)
+Overspeed! Stopping motor. (vel=160.0)
 ```
 
 ### Troubleshooting
