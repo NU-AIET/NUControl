@@ -24,6 +24,8 @@ Below are instructions for setting up the hardware and software to run the NUCon
 
 ### Encoder Board Wiring
 
+*TODO - make a wiring diagram for this.*
+
 Connect the AS5047P encoder board to the Teensy:
 - **Power**: 3.3V from Teensy to encoder board 3V input (Note: the 3V Teensy output is connected to the encoder board's 5V input—this is what works in testing)
 - **Ground**: GND to encoder board GND
@@ -43,7 +45,7 @@ Connect the AS5047P encoder board to the Teensy:
 ### Motor & Power
 
 - **Motor phases**: Connected to gate driver outputs (phases A, B, C)
-- **Power supply**: 24V, 2.5A minimum connected to J1 (the large right-angle power connector on the driver board)
+- **Power supply**: 18V, 2.5A nominal, 24V, 2.5A maximum connected to J1 (the large right-angle power connector on the driver board)
 
 ## Software Setup
 
@@ -84,8 +86,8 @@ There are two demo environments configured in `platformio.ini`:
 **To run:**
 1. Set the active environment to `position_sweep` in PlatformIO
 2. Build and upload: `Ctrl+Alt+B`, then `Ctrl+Alt+U`
-3. Open the Serial monitor at 115200 baud
-4. You should see messages like: `"Angular position target: X.X rad"`
+3. Open the Serial monitor at 115200 baud (`Ctrl+Shift+S`)
+4. Motor will calibrate, then you should see messages like: `"Angular position target: X.X rad"`
 
 **Expected behavior:** Motor smoothly moves between positions without overshooting significantly.
 
@@ -96,12 +98,12 @@ There are two demo environments configured in `platformio.ini`:
 **To run:**
 1. Set the active environment to `one_shot` in PlatformIO
 2. Build and upload: `Ctrl+Alt+B`, then `Ctrl+Alt+U`
-3. Open the Serial monitor at 115200 baud
-4. Motor will accelerate under constant torque and shut down at overspeed
+3. Open the Serial monitor at 115200 baud (`Ctrl+Shift+S`)
+4. Motor will calibrate, then accelerate briefly under constant torque (for ~1s) and spin down at overspeed.
 
 **Known issues & debugging:**
 - **Current sensor saturation**: The sensor may read near its maximum under high acceleration. Monitor the serial output for "Current Sensor Saturated!" warnings
-- **Instability at high speeds**: Setting `MAX_VEL` to 300 RPS will trigger the instability; motor may fail to shut down cleanly and draw excessive current. This can be reproduced using the one_shot demo
+- **Instability at high speeds**: Setting the PSU to (24V, 2.5A) and `MAX_VEL` to 300 RPS will trigger the instability; motor may fail to shut down cleanly and draw excessive current. This can be reproduced using the one_shot demo
 - **Velocity sensing**: Ensure the encoder is reading correctly (check `get_shaft_velocity()` output). If velocity reads zero, verify encoder wiring and SPI communication
 
 ### Power Supply Checklist

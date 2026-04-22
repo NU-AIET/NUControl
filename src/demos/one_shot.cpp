@@ -34,7 +34,7 @@ float kp = 0.1f;
 float kd = -0.003f;
 
 void update(){
-  const auto MAX_VEL = 240.f; // 200 rps
+  const auto MAX_VEL = 160.f; // 200 rps
 
   controller_1.update_sensors();
 
