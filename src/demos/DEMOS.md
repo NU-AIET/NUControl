@@ -79,6 +79,8 @@ The project uses **PlatformIO** to manage dependencies and build:
 
 ## Running the Demos
 
+Note: demos 1 and 2 below publish telemetry data to SerialUSB1 at 1 kHz. This can be viewed in real-time using PlotJuggler--see `scripts/motor_monitor.py` for run instructions.
+
 There are two demo environments configured in `platformio.ini`:
 
 ### 1. Position Sweep Demo (`position_sweep.cpp`)
