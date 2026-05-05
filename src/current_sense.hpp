@@ -94,7 +94,9 @@ private:
 
     // Uh oh!
     if (fabs(offset_ - offset) > 1e-2) {
-      Serial.print("Sensor Failed to Init. Current Read: ");
+      Serial.print("Sensor (pin ");
+      Serial.print(pin_);
+      Serial.print(") Failed to Init. Offset voltage (V): ");
       Serial.println(offset);
       return false;
 
