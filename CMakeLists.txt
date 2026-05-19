@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 project(NUControl VERSION 0.1.0 LANGUAGES CXX)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(nucontrol_core INTERFACE)
 target_include_directories(nucontrol_core INTERFACE
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/core>
   $<INSTALL_INTERFACE:include/nucontrol>
 )
 
