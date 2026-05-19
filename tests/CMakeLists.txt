@@ -7,8 +7,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Catch2)
 
+include(Catch)
+
 add_executable(test_transformations test_transformations.cpp)
 target_link_libraries(test_transformations PRIVATE nucontrol_core Catch2::Catch2WithMain)
-
-include(Catch)
 catch_discover_tests(test_transformations)
+
+add_executable(test_helpers test_helpers.cpp)
+target_link_libraries(test_helpers PRIVATE nucontrol_core Catch2::Catch2WithMain)
+catch_discover_tests(test_helpers)

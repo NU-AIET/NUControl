@@ -42,7 +42,7 @@ T normalize_angle(T radians)
 /// @param radians - the angle in radians
 /// @returns sin, cos of the given angle
 /// \note used here so custom implementation is easier
-std::pair<float, float> nu_sincos(float radians)
+inline std::pair<float, float> nu_sincos(float radians)
 {
   // Now zoned between -PI and PI
   auto rads = normalize_angle(radians);
