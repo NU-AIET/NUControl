@@ -31,6 +31,18 @@ It uses the [HANDyDriver](https://github.com/cwoodhayes/HANDyDriver) open source
 - Brushed motors do not require software commutation due to the presence of physical brushes. This greatly simplifies control at the cost of increased torque ripple.
 
 
+# Building and Running Tests
+
+The portable core (math, transforms, filters) can be built and tested on any machine with CMake and a C++17 compiler — no hardware required.
+
+```bash
+cmake -S . -B build -DBUILD_TESTING=ON
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
+```
+
+Catch2 is fetched automatically at configure time.
+
 # Running the Demos
 - The `position_sweep` demo sweeps a single EC45_Flat through 10 evenly spaced angular targets (0 – 5.4 rad) in a back-and-forth pattern using PD torque control. The active target is printed to Serial each time it advances (~1 s per step).
 - The `one_shot` demo applies a constant torque to a BLDC motor (EC45_Flat) until it exceeds 200 rps, then stops the motor. The current angular velocity + position from the encoder is printed at 10 Hz for debugging.
