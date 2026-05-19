@@ -16,3 +16,7 @@ catch_discover_tests(test_transformations)
 add_executable(test_helpers test_helpers.cpp)
 target_link_libraries(test_helpers PRIVATE nucontrol_core Catch2::Catch2WithMain)
 catch_discover_tests(test_helpers)
+
+add_executable(test_anticog test_anticog.cpp)
+target_link_libraries(test_anticog PRIVATE nucontrol_core Catch2::Catch2WithMain)
+catch_discover_tests(test_anticog)
