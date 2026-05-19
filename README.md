@@ -4,6 +4,32 @@ NU Control is intended to serve as a multi-functional, high performance, motor c
 
 It uses the [HANDyDriver](https://github.com/cwoodhayes/HANDyDriver) open source motor driver board, also developed at Northwestern, as the interface to the motors listed below.
 
+## Contents
+- `core` - the `nucontrol` library, which is a pure C++ header-only library for motor control math
+- `tests` - C++ tests for `nucontrol` using Catch2
+- `platforms` - platform-specific code using the library to target specific platforms, each with a demo example or two. Supported platforms:
+    - teensy40
+
+# Building and Running Tests
+
+The portable core (math, transforms, filters) can be built and tested on any machine with CMake and a C++17 compiler — no hardware required.
+
+```bash
+cmake -S . -B build -DBUILD_TESTING=ON
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
+```
+
+Catch2 is fetched automatically at configure time.
+
+# Running the Demos
+## Teensy40 board (PlatformIO)
+- The `position_sweep` demo sweeps a single EC45_Flat through 10 evenly spaced angular targets (0 – 5.4 rad) in a back-and-forth pattern using PD torque control. The active target is printed to Serial each time it advances (~1 s per step).
+- The `one_shot` demo applies a constant torque to a BLDC motor (EC45_Flat) until it exceeds 200 rps, then stops the motor. The current angular velocity + position from the encoder is printed at 10 Hz for debugging.
+
+## Setup
+See the platform's [DEMOS.md](/platforms/teensy40/demos/DEMOS.md) for detailed instructions on how to set up the hardware and software to run the demos.
+
 ## Capabilities
 - Brushless Direct Current Motors
     - Example Motors:
@@ -30,22 +56,3 @@ It uses the [HANDyDriver](https://github.com/cwoodhayes/HANDyDriver) open source
 ## Brushed Direct Current Motors (Coming Soon)
 - Brushed motors do not require software commutation due to the presence of physical brushes. This greatly simplifies control at the cost of increased torque ripple.
 
-
-# Building and Running Tests
-
-The portable core (math, transforms, filters) can be built and tested on any machine with CMake and a C++17 compiler — no hardware required.
-
-```bash
-cmake -S . -B build -DBUILD_TESTING=ON
-cmake --build build --parallel
-ctest --test-dir build --output-on-failure
-```
-
-Catch2 is fetched automatically at configure time.
-
-# Running the Demos
-- The `position_sweep` demo sweeps a single EC45_Flat through 10 evenly spaced angular targets (0 – 5.4 rad) in a back-and-forth pattern using PD torque control. The active target is printed to Serial each time it advances (~1 s per step).
-- The `one_shot` demo applies a constant torque to a BLDC motor (EC45_Flat) until it exceeds 200 rps, then stops the motor. The current angular velocity + position from the encoder is printed at 10 Hz for debugging.
-
-## Setup
-See [src/demos/DEMOS.md](src/demos/DEMOS.md) for detailed instructions on how to set up the hardware and software to run the demos.
