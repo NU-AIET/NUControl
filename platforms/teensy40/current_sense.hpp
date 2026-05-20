@@ -6,6 +6,7 @@
 #include "helpers.hpp"
 #include "errors.hpp"
 #include "discrete_filter.hpp"
+#include "current_sensor_interface.hpp"
 
 /// @brief Inline current sensor placed on a phase of a motor
 class InlineCurrentSensor
@@ -107,11 +108,11 @@ private:
 
 };
 
-class InlineCurrentSensorPackage
+class InlineCurrentSensorPackage : public ICurrentSensorPackage
 {
 public:
   InlineCurrentSensorPackage() = default;
-  ~InlineCurrentSensorPackage() = default;
+  ~InlineCurrentSensorPackage() override = default;
 
   InlineCurrentSensorPackage(std::vector<InlineCurrentSensor *> sensors)
   : sensors_(sensors),
@@ -124,7 +125,7 @@ public:
     }
   }
 
-  bool init_sensors()
+  bool init_sensors() override
   {
     bool all_inited = true;
     for (size_t i = 0; i < num_sensors_; ++i) {
@@ -133,7 +134,7 @@ public:
     return all_inited;
   }
 
-  void print_calibration()
+  void print_calibration() override
   {
     Serial.println("Phase Indicies: ");
     Serial.println(phase_idx_.a);
@@ -146,7 +147,7 @@ public:
     Serial.println(phase_dirs_.c);
   }
 
-  bool align_sensors(BrushlessDriver & driver, float align_volts = 0.5f)
+  bool align_sensors(IBrushlessDriver & driver, float align_volts = 0.5f) override
   {
 
     driver.enable();
@@ -241,7 +242,7 @@ public:
 
   }
 
-  bool load_calibration(PhaseValues<int> phase_idx, PhaseValues<int> phase_dirs)
+  bool load_calibration(PhaseValues<int> phase_idx, PhaseValues<int> phase_dirs) override
   {
     phase_idx_ = phase_idx;
     phase_dirs_ = phase_dirs;

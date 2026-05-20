@@ -1,11 +1,11 @@
 #ifndef DRIVER_HPP
 #define DRIVER_HPP
 #include <Arduino.h>
-#include "transformations.hpp"
+#include "driver_interface.hpp"
 
 
 /// @brief Three phase motor driver
-class BrushlessDriver
+class BrushlessDriver : public IBrushlessDriver
 {
 public:
   BrushlessDriver() = default;
@@ -72,7 +72,7 @@ public:
   /// \brief set the phase voltages of the motor
   /// \param voltages - The voltages to be applied to the end of each phase (A, B, C)
   /// \returns the PWM duty in bits applied to each phase
-  PhaseValues<int> set_phase_voltages(PhaseValues<float> voltages) const
+  PhaseValues<int> set_phase_voltages(PhaseValues<float> voltages) override
   {
     if (!enabled_) {
       return {0, 0, 0};

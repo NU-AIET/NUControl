@@ -4,7 +4,9 @@
 #include "driver.hpp"
 #include "current_sense.hpp"
 #include "transformations.hpp"
-#include "encoder.hpp"
+#include "encoder_interface.hpp"
+#include "driver_interface.hpp"
+#include "current_sensor_interface.hpp"
 #include "discrete_filter.hpp"
 #include "motors.hpp"
 // #include "anticog_helpers.hpp"
@@ -36,9 +38,9 @@ public:
 
   BrushlessController(
     MotorParameters motor,
-    BrushlessDriver & motor_driver,
-    InlineCurrentSensorPackage & current_sensors,
-    AbsoluteEncoder & pos_sensor)
+    IBrushlessDriver & motor_driver,
+    ICurrentSensorPackage & current_sensors,
+    IAbsoluteEncoder & pos_sensor)
   : motor_(motor),
     driver_(motor_driver),
     cs_(current_sensors),
@@ -416,9 +418,9 @@ public:
 
 private:
   MotorParameters motor_;
-  BrushlessDriver & driver_;
-  InlineCurrentSensorPackage & cs_;
-  AbsoluteEncoder & position_sensor_;
+  IBrushlessDriver & driver_;
+  ICurrentSensorPackage & cs_;
+  IAbsoluteEncoder & position_sensor_;
 
   PhaseValues<Butterworth2nd<float>> applited_voltage_filters_;
   PhaseValues<Butterworth2nd<float>> feedback_voltage_filters_;
