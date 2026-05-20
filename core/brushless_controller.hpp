@@ -353,8 +353,8 @@ private:
   ICurrentSensorPackage & cs_;
   IAbsoluteEncoder & position_sensor_;
 
-  LogFn   log_;
   SleepFn sleep_;
+  LogFn   log_;
 
   PhaseValues<Butterworth2nd<float>> applited_voltage_filters_;
   PhaseValues<Butterworth2nd<float>> feedback_voltage_filters_;

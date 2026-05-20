@@ -69,7 +69,8 @@ void setup()
 
   Serial.println("Starting cogging map — do not disturb the motor.");
 
-  mapper.map_cogging(5);
+  // just do 1 loop; up this to more if you want better accuracy
+  mapper.map_cogging(1);
   timer_.begin(update, 100);
 }
 
