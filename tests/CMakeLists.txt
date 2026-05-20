@@ -24,3 +24,7 @@ catch_discover_tests(test_anticog)
 add_executable(test_brushless_controller test_brushless_controller.cpp)
 target_link_libraries(test_brushless_controller PRIVATE nucontrol_core Catch2::Catch2WithMain)
 catch_discover_tests(test_brushless_controller)
+
+add_executable(test_cogging_mapper test_cogging_mapper.cpp)
+target_link_libraries(test_cogging_mapper PRIVATE nucontrol_core Catch2::Catch2WithMain)
+catch_discover_tests(test_cogging_mapper)
