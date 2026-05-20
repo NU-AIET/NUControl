@@ -29,8 +29,8 @@ const uint16_t EncoderReadCmd = (0b11 << 14) | 0x3FFF;
 SPIEncoder Encoder1{EncoderReadCmd, SPI, 10};
 BrushlessDriver GateDriver1{{3, 4, 5}, 2, PWM_FREQ, PWM_RES, DRIVER_VOLTAGE};
 BrushlessController controller_1{EC45_Flat, GateDriver1, Current_Sensors1, Encoder1,
-  [](const std::string & s){ Serial.println(s.c_str()); },
-  [](int ms){ delay(ms); }}; // DISTAL
+  [](int ms){ delay(ms); },
+  [](const std::string & s){ Serial.println(s.c_str()); }}; // DISTAL
 
 int idx = 0;
 size_t cntr = 0;

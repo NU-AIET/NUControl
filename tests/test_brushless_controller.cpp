@@ -40,6 +40,8 @@ struct MockSensorPackage : public ICurrentSensorPackage
   bool load_calibration(PhaseValues<int>, PhaseValues<int>) override { return true; }
 };
 
+static auto no_sleep = [](int){};
+
 // Helper: build a controller ready to use (init'd, start_control called)
 static BrushlessController make_controller(
   MockDriver & drv,
@@ -48,7 +50,7 @@ static BrushlessController make_controller(
   ControllerMode mode = ControllerMode::TORQUE,
   int period_us = 100)
 {
-  BrushlessController ctrl{EC45_Flat, drv, cs, enc};
+  BrushlessController ctrl{EC45_Flat, drv, cs, enc, no_sleep};
   ctrl.init_components();
   ctrl.set_control_mode(mode);
   ctrl.start_control(period_us);
@@ -63,7 +65,7 @@ TEST_CASE("DISABLE mode: update_control is a no-op")
   MockSensorPackage cs;
   MockEncoder enc;
 
-  BrushlessController ctrl{EC45_Flat, drv, cs, enc};
+  BrushlessController ctrl{EC45_Flat, drv, cs, enc, no_sleep};
   ctrl.init_components();
   ctrl.set_control_mode(ControllerMode::DISABLE);
   ctrl.start_control(100);
@@ -79,7 +81,7 @@ TEST_CASE("TORQUE mode, zero target: output voltages centered near zero")
   MockSensorPackage cs;
   MockEncoder enc;
 
-  BrushlessController ctrl{EC45_Flat, drv, cs, enc};
+  BrushlessController ctrl{EC45_Flat, drv, cs, enc, no_sleep};
   ctrl.init_components();
   ctrl.set_control_mode(ControllerMode::TORQUE);
   ctrl.set_feedforward_state(false);
@@ -104,7 +106,7 @@ TEST_CASE("TORQUE mode, feedforward only: nonzero target produces nonzero voltag
   MockSensorPackage cs;
   MockEncoder enc;
 
-  BrushlessController ctrl{EC45_Flat, drv, cs, enc};
+  BrushlessController ctrl{EC45_Flat, drv, cs, enc, no_sleep};
   ctrl.init_components();
   ctrl.set_control_mode(ControllerMode::TORQUE);
   ctrl.set_feedforward_state(true);
@@ -134,7 +136,7 @@ TEST_CASE("OPEN_LOOP_VELOCITY: shaft angle integrates at commanded rate")
   const int   period_us  = 1000;  // 1 ms steps
   const float period_s   = period_us * 1e-6f;
 
-  BrushlessController ctrl{EC45_Flat, drv, cs, enc};
+  BrushlessController ctrl{EC45_Flat, drv, cs, enc, no_sleep};
   ctrl.init_components();
   ctrl.set_control_mode(ControllerMode::OPEN_LOOP_VELOCITY);
   ctrl.set_target(target_vel);
@@ -165,7 +167,7 @@ TEST_CASE("start_control resets velocity to zero and enables driver")
   MockSensorPackage cs;
   MockEncoder enc;
 
-  BrushlessController ctrl{EC45_Flat, drv, cs, enc};
+  BrushlessController ctrl{EC45_Flat, drv, cs, enc, no_sleep};
   ctrl.init_components();
   ctrl.set_control_mode(ControllerMode::TORQUE);
   ctrl.start_control(100);
@@ -180,7 +182,7 @@ TEST_CASE("stop_control disables driver")
   MockSensorPackage cs;
   MockEncoder enc;
 
-  BrushlessController ctrl{EC45_Flat, drv, cs, enc};
+  BrushlessController ctrl{EC45_Flat, drv, cs, enc, no_sleep};
   ctrl.init_components();
   ctrl.set_control_mode(ControllerMode::TORQUE);
   ctrl.start_control(100);

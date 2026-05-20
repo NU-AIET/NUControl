@@ -43,14 +43,14 @@ public:
     IBrushlessDriver & motor_driver,
     ICurrentSensorPackage & current_sensors,
     IAbsoluteEncoder & pos_sensor,
-    LogFn   log_fn   = [](const std::string &){},
-    SleepFn sleep_fn = [](int){})
+    SleepFn sleep_fn,
+    LogFn   log_fn   = [](const std::string &){})
   : motor_(motor),
     driver_(motor_driver),
     cs_(current_sensors),
     position_sensor_(pos_sensor),
-    log_(log_fn),
-    sleep_(sleep_fn)
+    sleep_(sleep_fn),
+    log_(log_fn)
   {
     Kp_ = motor_.phase_L * _2_PI_ * 25.f;
     Ki_ = motor_.phase_R * _2_PI_ * 25.f;
