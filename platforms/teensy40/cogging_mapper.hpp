@@ -1,4 +1,5 @@
-#include "brushless_controller.hpp"
+#include <TeensyTimerTool.h>
+#include "../../core/brushless_controller.hpp"
 #include <array>
 
 
@@ -23,7 +24,7 @@ class CoggingMapper
             if(disable_cogging){ controller_.disable_anticog();}
             auto motor = controller_.get_motor();
             max_torque = 0.5f * motor.kT * motor.SAFE_CURRENT;
-            controller_.start_control(100, false);
+            controller_.start_control(100);
             timer_.begin([this] {cogging_mapper();}, 100);
         }
 
@@ -202,7 +203,7 @@ class CoggingMapper
 
         if (looper < max_loop) {
             idx = 0;
-            controller_.start_control(100, false);
+            controller_.start_control(100);
             timer_.begin([this] {cogging_mapper();}, 100);
             return;
         } 
@@ -213,7 +214,7 @@ class CoggingMapper
             looper = 0;
             target_selector(dir);
             idx = 0;
-            controller_.start_control(100, false);
+            controller_.start_control(100);
             timer_.begin([this] {cogging_mapper();}, 100);
             return;
         }

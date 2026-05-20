@@ -101,7 +101,7 @@ void setup()
   controller_1.set_feedback_state(true);
   controller_1.set_back_emf_comp_state(false);
 
-  controller_1.start_control(100,false);
+  controller_1.start_control(100);
   timer_.begin(update, 100);
 }
 

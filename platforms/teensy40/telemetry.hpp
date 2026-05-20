@@ -1,7 +1,7 @@
 #ifndef TELEMETRY_HPP
 #define TELEMETRY_HPP
 #include <Arduino.h>
-#include "brushless_controller.hpp"
+#include "../../core/brushless_controller.hpp"
 
 // Snapshot of motor state for live plotting over SerialUSB1 (USB dual-serial).
 // Usage: call populate() each time you want a sample, then serialize() to emit

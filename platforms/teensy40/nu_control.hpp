@@ -8,7 +8,7 @@
 #include "helpers.hpp"
 
 #include "motors.hpp"
-#include "brushless_controller.hpp"
+#include "../../core/brushless_controller.hpp"
 #include "spi_encoder.hpp"
 #include "transformations.hpp"
 #include "cogging_mapper.hpp"

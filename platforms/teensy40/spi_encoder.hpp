@@ -1,9 +1,11 @@
 #ifndef SPI_ENCODER_HPP
 #define SPI_ENCODER_HPP
 
-#include "encoder.hpp"
+#include "../../core/encoder_interface.hpp"
+#include <Arduino.h>
+#include <SPI.h>
 
-class SPIEncoder : public AbsoluteEncoder
+class SPIEncoder : public IAbsoluteEncoder
 {
 public:
   SPIEncoder() = default;
