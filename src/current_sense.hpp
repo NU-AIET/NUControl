@@ -82,7 +82,7 @@ private:
   void (* error_callback) (ErrorCodes);
 
 
-  bool validate_offset(size_t n = 10000) const
+  bool validate_offset(size_t n = 10000)
   {
     int sum_ = 0;
     for (size_t i = 0; i < n; ++i) {
@@ -90,12 +90,21 @@ private:
     }
     float offset = static_cast<float>(sum_) / n * ADC_GAIN_;
 
-    // Serial.println(offset);
 
-    // Uh oh!
-    if (fabs(offset_ - offset) > 1e-2) {
+    if (fabs(offset_ - offset) > 0.5) {
+      Serial.println("Offset deviates from acceptable value.");
+      Serial.print("Expected: 1.65\t Measured:\t");
+      Serial.println(offset);
       return false;
     }
+
+    if (fabs(offset_ - offset) > 1e-2) {
+      Serial.println("Offset deviates from expected value.");
+      Serial.print("Expected: 1.65\t Measured:\t");
+      Serial.println(offset);
+      offset_ = offset;
+    }
+
     return true;
 
   }
