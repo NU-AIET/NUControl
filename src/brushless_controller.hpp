@@ -7,8 +7,8 @@
 #include "encoder.hpp"
 #include "discrete_filter.hpp"
 #include "motors.hpp"
-#include "anticog_helpers.hpp"
-#include <functional>
+// #include "anticog_helpers.hpp"
+// #include <functional>
 
 enum ControllerMode
 {
@@ -23,13 +23,9 @@ struct BrushlessCalibration
   const PhaseValues<int> cs_phase_dirs{0, 0, 0};
 
   const int encoder_direction{0};
-  const float encoder_offset{0};
+  const float eangle_offset{0};
 
-  const float cogging_offset_ = 0;
-
-  // constexpr std::array<float, steps_> anticog_torque{};
-  // constexpr PhaseValues<std::array<float, steps_>> anticog_volts{}; 
-
+  const float cogging_offset = 0.f;
 };
 
 class BrushlessController
@@ -147,7 +143,6 @@ public:
   {
     auto ret_d = driver_.init();
     auto ret_cs = cs_.init_sensors();
-    Serial.println(ret_d);
     set_filters(filter_cutoff_freq_hz_, filter_cutoff_freq_hz_current_, filter_cutoff_freq_hz_fb_);
 
     return ret_d & ret_cs;
@@ -155,96 +150,104 @@ public:
   }
 
   void print_calibration(){
+    Serial.println("=====");
     cs_.print_calibration();
     Serial.print("Encoder Direction: ");
     Serial.println(pos_sensor_dir_);
     Serial.print("Encoder Offset: ");
-    Serial.println(encoder_offset_,6);
+    Serial.println(e_ang_offset_,6);
+    Serial.println("=====");
   }
 
-  bool align_sensors(bool e_angle_align = true)
+  bool align_sensors()
   {
+    e_ang_offset_ = 0.f;
 
-    auto ret = cs_.align_sensors(driver_);
-
-    if(!e_angle_align) {
+    auto ret = cs_.align_sensors(driver_, 0.5f * motor_.phase_R * motor_.SAFE_CURRENT);
+    if(!ret){
+      Serial.println("Drivers failed to align");
       return ret;
     }
-
     delay(1000);
-
-    // Reset open loop angle and velocity 
-    encoder_offset_ = 0.f;
+    // Set inital values
+    update_sensors();
     open_loop_shaft_angle_ = 0.f;
     open_loop_shaft_velocity_ = 0.f;
-
-    set_control_mode(ControllerMode::OPEN_LOOP_VELOCITY);
-    target_ = static_cast<float>(calibration_dir_) * calibration_scan_speed_;
-
-    start_control(1000, false);
-
-    update_sensors();
 
     float init_ang = encoder_angle.get_full_angle();
-    float enc_sum = 0.f;
-    int steps = 0;
 
-    while(static_cast<float>(calibration_dir_) * open_loop_shaft_angle_ < calibration_scan_distance_){
-      update_sensors();
-      enc_sum += encoder_angle.get_angle();
-      steps++;
-      update_control();
-      delay(1);
-    }
+    float offset_sum = 0.f;
+    float offset_pos_sum = 0.f;
+    float offset_neg_sum = 0.f;
+    int samples = 0;
 
-    target_ = 0.f;
-    update_control();
-    stop_control();
+    Serial.println("Forward Move");
 
-    Serial.println("Forward Move Complete");
-    Serial.flush();
-
-    if(encoder_angle.get_full_angle() > init_ang + 0.1){
-      pos_sensor_dir_ = 1;
-      Serial.println("Direction is: 1");
-    } else {
-      if(encoder_angle.get_full_angle() < init_ang - 0.1){
-        pos_sensor_dir_ = -1;
-        Serial.println("Direction is: -1");
-      }
-    else {
-      Serial.println("Error: Sensor did not report motion");
-      Serial.flush();
-      return false;
-    }
-  }
-
+    // float inital_shaft_angle = shaft_angle_.get_full_angle();
+    set_control_mode(ControllerMode::OPEN_LOOP_VELOCITY);
+    target_ = static_cast<float>(calibration_dir_) * calibration_scan_speed_;
     start_control(1000, false);
-    open_loop_shaft_angle_ = 0.f;
-    open_loop_shaft_velocity_ = 0.f;
-    target_ = static_cast<float>(calibration_dir_) * -calibration_scan_speed_;
-
-    while(static_cast<float>(calibration_dir_) * open_loop_shaft_angle_ > -calibration_scan_distance_){
-      update_sensors();
-      enc_sum += encoder_angle.get_angle();
-      steps++;
-      update_control();
-      delay(1);
+    while(static_cast<float>(calibration_dir_) * open_loop_shaft_angle_ < calibration_scan_distance_){
+        control_step();
+        float elec_cmd = get_eangle(open_loop_shaft_angle_);
+        float elec_meas = get_eangle(static_cast<float>(calibration_dir_) * pos_sensor_dir_ * encoder_angle.get_full_angle());
+        float offset_pos = normalize_angle(elec_cmd - elec_meas);
+        float offset_neg = normalize_angle(elec_cmd + elec_meas);
+        offset_pos_sum += offset_pos;
+        offset_neg_sum += offset_neg;
+        samples++;
+        delay(1);
     }
-
-    Serial.println("Backwards Move Complete");
-    Serial.flush();
-
-    target_ = 0.f;
-    update_control();
     stop_control();
 
-    set_control_mode(ControllerMode::DISABLE);
+    float new_ang = encoder_angle.get_full_angle();
 
-    encoder_offset_ = pos_sensor_dir_ * enc_sum / steps;
+    if(new_ang > init_ang + 0.1){
+      pos_sensor_dir_ = calibration_dir_;
+      offset_sum = offset_pos_sum;
 
-    Serial.println(encoder_offset_);
 
+    } else {
+      if(new_ang < init_ang - 0.1) {
+        pos_sensor_dir_ = -calibration_dir_;
+        offset_sum = offset_neg_sum;
+      }
+      else{
+        Serial.println("No motion detected. Is Encoder Working?");
+        Serial.print("Initial Angle:\t");
+        Serial.println(init_ang, 6);
+        Serial.print("Final Angle:\t");
+        Serial.println(new_ang,6);
+        return false;
+      }
+    }
+    Serial.print("Direction:\t");
+    Serial.println(pos_sensor_dir_);
+
+
+    Serial.println("Reverse Move");
+
+    open_loop_shaft_angle_ = 0.f;
+    target_ = static_cast<float>(calibration_dir_) * -calibration_scan_speed_;
+    start_control(1000, false);
+    while(static_cast<float>(calibration_dir_) * open_loop_shaft_angle_ > -calibration_scan_distance_){
+        control_step();
+        float elec_cmd = get_eangle(open_loop_shaft_angle_);
+        float elec_meas = get_eangle(static_cast<float>(calibration_dir_) * pos_sensor_dir_ * encoder_angle.get_full_angle());
+        float offset = normalize_angle(elec_cmd - elec_meas);
+        offset_sum += offset;
+        samples++;
+        delay(1);
+    }
+    stop_control();
+    shaft_velocity_ = 0;
+    update_sensors();
+    stop_control();
+    e_ang_offset_ = normalize_angle(offset_sum / samples);
+
+    Serial.print("Zero Electrical Angle: ");
+    Serial.println(e_ang_offset_);
+  
     return ret;
   }
 
@@ -253,19 +256,20 @@ public:
     auto ret = cs_.load_calibration(calib_.cs_phase_idx, calib_.cs_phase_dirs);
 
     set_encoder_direction(calib_.encoder_direction);
-    set_encoder_offset(calib_.encoder_offset);
+    set_eangle_offset(calib_.eangle_offset);
 
     print_calibration();
 
     return ret;
   }
 
-  float get_encoder_offset() const { return encoder_offset_; }
+  float get_eangle_offset() const { return e_ang_offset_; }
   float get_shaft_angle() const { return shaft_angle_; }
   float get_shaft_radians() const { return normalize_angle(shaft_angle_); }
   float get_encoder_angle() const { return encoder_angle.get_full_angle(); }
   float get_encoder_radians() const { return encoder_angle.get_angle(); }
   float get_shaft_velocity() const { return shaft_velocity_; }
+  MotorParameters get_motor() const {return motor_;}
 
   void set_encoder_direction(int dir) {
     if(dir == 1){ pos_sensor_dir_= 1; return;}
@@ -275,7 +279,7 @@ public:
       return;
     }
   }
-  void set_encoder_offset(float offset) { encoder_offset_ = offset; }
+  void set_eangle_offset(float offset) { e_ang_offset_ = offset; }
   void set_calibration_scan_speed(float w) { calibration_scan_speed_ = w;}
   void set_calibration_scan_range (float rads) {calibration_scan_distance_ = rads;}
   void set_calibation_direction(int dir) {
@@ -327,7 +331,7 @@ public:
     encoder_angle.update_angle(position_sensor_.read());
     shaft_angle_ = pos_filter_.update(pos_sensor_dir_ * encoder_angle.get_full_angle());
     electrical_angle_ = get_eangle(shaft_angle_);
-    shaft_velocity_ = vel_filter_cutoff_.update(vel_filter_.update(shaft_angle_));
+    // shazft_velocity_ = vel_filter_cutoff_.update(vel_filter_.update(shaft_angle_));
     phase_currents_ = cs_.get_phase_currents(true);
     quaddirect_currents_ = phases_to_quaddirect<float>(phase_currents_, electrical_angle_);
   }
@@ -355,9 +359,6 @@ public:
 
       case ControllerMode::TORQUE:
         {
-
-          
-
           // Add in cogging torque if needed 
           if (anticog_enable_) { target_ += torque_mapper_(shaft_angle_ - cogging_offset_); }
 
@@ -388,12 +389,14 @@ public:
             filtered_ctrl_volts += volt_mapper_(shaft_angle_ - cogging_offset_);
           }
 
+          
           // Shift all voltages by 1 to avoid setting PWM pin to 0 as it will switch to digital and cause delays
           const auto dr_volts = center_phase_voltages(filtered_ctrl_volts) + PhaseValues<float>{1.f, 1.f, 1.f};
           
           last_phase_volts_ = dr_volts;
 
           driver_.set_phase_voltages(dr_volts);
+
         }
         return;
 
@@ -423,8 +426,8 @@ private:
 
   float filter_cutoff_freq_hz_fb_ = 500.f;
 
-  float calibration_scan_speed_ = 0.125 * PI;
-  float calibration_scan_distance_ = 0.25f * PI;
+  float calibration_scan_speed_ = 0.25f * PI;
+  float calibration_scan_distance_ = 0.5f * PI;
   int calibration_dir_ = 1;
 
 
@@ -434,7 +437,8 @@ private:
   int pos_sensor_dir_ = 1;
   float shaft_angle_ = 0.f; // radians
   float shaft_velocity_ = 0.f; // rad /s
-  float encoder_offset_ = 0.f; // radians
+  // float encoder_offset_ = 0.f; // radians
+  float e_ang_offset_ = 0.f;
   float electrical_angle_ = 0.f; //radians
 
   DiscreteFilter<float, float> pos_filter_{{1.f}, {}};
@@ -554,7 +558,7 @@ private:
 
   float get_eangle(float mech_ang) const
   {
-    return normalize_angle(static_cast<float>(motor_.pole_pairs) * (mech_ang - encoder_offset_));
+    return normalize_angle(static_cast<float>(motor_.pole_pairs) * (mech_ang) - e_ang_offset_);
   }
 
   PhaseValues<float> center_phase_voltages(PhaseValues<float> phase_volts) const

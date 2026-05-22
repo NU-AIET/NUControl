@@ -5,27 +5,21 @@
 #include <array>
 #include "transformations.hpp"
 
-const size_t COGGING_STEPS = 1000;
-
 std::array<float, 0> default_anticog_torque_map{};
 PhaseValues<std::array<float, 0>> default_anticog_volt_map{};
 
 template<std::size_t steps_>
 class AnticoggingCompensator{
   public:
-    AnticoggingCompensator()
-    : anticog_torque_map_(default_anticog_torque_map),
-      anticog_volt_map_(default_anticog_volt_map)
-    {}
     ~AnticoggingCompensator() = default;
 
     AnticoggingCompensator(const std::array<float, steps_> & anticog_torque_map)
     : anticog_torque_map_(anticog_torque_map),
-      anticog_volt_map_(default_anticog_volt_map)
+      anticog_volt_map_(empty_volt_map())
     {}
 
     AnticoggingCompensator(const PhaseValues<std::array<float, steps_>> & anticog_volt_map)
-    : anticog_torque_map_(default_anticog_torque_map),
+    : anticog_torque_map_(empty_torque_map()),
       anticog_volt_map_(anticog_volt_map)
     {}
 
@@ -73,12 +67,21 @@ class AnticoggingCompensator{
   }
 
   private:
-    std::array<float, steps_> & anticog_torque_map_;
-    PhaseValues<std::array<float, steps_>> & anticog_volt_map_;
+    const std::array<float, steps_> & anticog_torque_map_;
+    const PhaseValues<std::array<float, steps_>> & anticog_volt_map_;
+
+    static const std::array<float, steps_> & empty_torque_map() {
+      static const std::array<float, steps_> empty{};
+      return empty;
+    }
+
+    static const PhaseValues<std::array<float, steps_>> & empty_volt_map() {
+      static const PhaseValues<std::array<float, steps_>> empty{};
+      return empty;
+    }
 
 
 };
 
-AnticoggingCompensator<0> default_anticog;
 
 #endif
