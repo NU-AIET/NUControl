@@ -331,7 +331,7 @@ public:
     encoder_angle.update_angle(position_sensor_.read());
     shaft_angle_ = pos_filter_.update(pos_sensor_dir_ * encoder_angle.get_full_angle());
     electrical_angle_ = get_eangle(shaft_angle_);
-    // shazft_velocity_ = vel_filter_cutoff_.update(vel_filter_.update(shaft_angle_));
+    shazft_velocity_ = vel_filter_cutoff_.update(vel_filter_.update(shaft_angle_));
     phase_currents_ = cs_.get_phase_currents(true);
     quaddirect_currents_ = phases_to_quaddirect<float>(phase_currents_, electrical_angle_);
   }
